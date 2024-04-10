@@ -10,11 +10,22 @@ find_package(SDL2_IMAGE REQUIRED)
 set(SRC_FILES 
 main.cpp
 AnimViewLevel.cpp
+${CMAKE_SOURCE_DIR}/external/imgui/imgui_demo.cpp
+${CMAKE_SOURCE_DIR}/external/imgui/imgui_draw.cpp
+${CMAKE_SOURCE_DIR}/external/imgui/imgui_tables.cpp
+${CMAKE_SOURCE_DIR}/external/imgui/imgui_widgets.cpp
+${CMAKE_SOURCE_DIR}/external/imgui/imgui.cpp
+${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_sdl2.cpp
+${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_sdlrenderer2.cpp
+${CMAKE_SOURCE_DIR}/external/imgui/misc/cpp/imgui_stdlib.cpp
 )
 
 set(INCLUDE_DIRS
 ${CMAKE_CURRENT_LIST_DIR}
 ${CMAKE_CURRENT_LIST_DIR}/Core
+${CMAKE_SOURCE_DIR}/external/imgui
+${CMAKE_SOURCE_DIR}/external/imgui/backends
+${CMAKE_SOURCE_DIR}/external/imgui/misc/cpp
 )
 
 set(LINK_LIBRARIES

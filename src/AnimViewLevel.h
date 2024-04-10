@@ -20,6 +20,7 @@ protected:
     uint32_t currentFrame = -1;
     Camera m_camera;
     bool m_holdingCamera = false;
+    bool m_winOpen = true;
 };
 
 #endif

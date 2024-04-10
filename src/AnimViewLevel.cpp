@@ -17,25 +17,27 @@ void AnimViewLevel::enter()
     m_camera.setPos(gamedata::stages::startingCameraPos);
     m_camera.setScale(gamedata::stages::startingCameraScale);
 
+    auto path = m_application->getBasePath();
+
     Renderer *renderer = m_application->getRenderer();
     m_anim = new EngineAnimation();
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_1.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_2.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_3.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_4.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_5.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_6.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_7.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_8.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_9.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_10.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_11.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_12.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_13.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_14.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_15.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_16.png", *renderer);
-    m_anim->addFrame("T:/cppStuff/AnimationEditor/Resources/MoveProjectileCharAnim_17.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_1.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_2.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_3.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_4.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_5.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_6.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_7.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_8.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_9.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_10.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_11.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_12.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_13.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_14.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_15.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_16.png", *renderer);
+    m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_17.png", *renderer);
     m_anim->scaleToHeight(495);
     m_anim->m_origin = {200, 495};
     m_anim->setDuration(60);
@@ -86,10 +88,18 @@ void AnimViewLevel::update()
 {
     m_camera.update();
     currentFrame++;
+
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+    
+    ImGui::ShowDemoWindow(&m_winOpen);
 }
 
 void AnimViewLevel::draw()
 {
+    ImGui::Render();
+
     auto &renderer = *m_application->getRenderer();
     renderer.fillRenderer(SDL_Color{ 25, 25, 25, 255 });
 
@@ -102,7 +112,9 @@ void AnimViewLevel::draw()
     renderer.drawRectangle({m_size.x / 2.0f - gamedata::global::cameraWidth * gamedata::stages::maxCameraScale / 2.0f, gamedata::stages::stageHeight - gamedata::global::cameraHeight * gamedata::stages::maxCameraScale - 1},
     {gamedata::global::cameraWidth * gamedata::stages::maxCameraScale, gamedata::global::cameraHeight * gamedata::stages::maxCameraScale}, {255, 255, 0, 255}, m_camera);
 
-    renderer.renderTexture((*m_anim)[currentFrame], m_size.x / 2.0f - m_anim->m_origin.x, gamedata::stages::levelOfGround - m_anim->m_origin.y, m_anim->m_width, m_anim->m_height, m_camera, 0, SDL_FLIP_NONE);
+    //renderer.renderTexture((*m_anim)[currentFrame], m_size.x / 2.0f - m_anim->m_origin.x, gamedata::stages::levelOfGround - m_anim->m_origin.y, m_anim->m_width, m_anim->m_height, m_camera, 0, SDL_FLIP_NONE);
+
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
 
     renderer.updateScreen();
 }

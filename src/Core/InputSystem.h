@@ -8,6 +8,9 @@
 #include <memory>
 #include <set>
 #include "Vector2.h"
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
 
 //List of possible events
 //Anything that is inherited from InputReactor can subscribe to them
