@@ -119,6 +119,22 @@ std::pair<uint32_t, T> &TimelineProperty<T>::getValuePair(int id_)
     return m_values[id_];
 }
 
+template <typename T>
+void TimelineProperty<T>::setPairValue(int id_, T &&value_)
+{
+    m_values[id_].second = std::move(value_);
+}
+
+template <typename T>
+bool TimelineProperty<T>::deletePair(int id_)
+{
+    if (m_values[id_].first == 0)
+        return false;
+
+    m_values.erase(m_values.begin() + id_);
+    return true;
+}
+
 template<typename T>
 bool TimelineProperty<T>::isEmpty() const
 {

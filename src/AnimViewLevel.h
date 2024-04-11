@@ -3,6 +3,7 @@
 
 #include "Level.h"
 #include "EngineAnimation.h"
+#include "ImTimelinePropertyInt.h"
 
 class AnimViewLevel : public Level
 {
@@ -16,11 +17,16 @@ protected:
     void update() override;
     void draw() override;
 
+    ImTimelinePropertyInt m_animFrames;
     EngineAnimation *m_anim;
-    uint32_t currentFrame = -1;
+    int currentFrame = -1;
     Camera m_camera;
     bool m_holdingCamera = false;
     bool m_winOpen = true;
+    bool m_loopAnimation = true;
+    bool m_runAnimation = true;
+
+    std::vector<int> vals;
 };
 
 #endif

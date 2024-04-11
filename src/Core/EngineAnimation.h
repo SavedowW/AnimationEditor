@@ -27,15 +27,15 @@ public:
     std::vector<SDL_Surface *> m_surfaces;
     std::vector<SDL_Surface *> m_whiteSurfaces;
     std::vector<SDL_Texture *> m_textures;
-    int m_width = 0;
-    int m_height = 0;
-    int m_realWidth = 0;
-    int m_realHeight = 0;
+    int m_width = 1;
+    int m_height = 1;
+    int m_realWidth = 1;
+    int m_realHeight = 1;
     int m_frameCount = 0;
     SDL_RWops *m_rw = nullptr;
 
     TimelineProperty<int> m_framesData;
-    uint32_t m_duration = 0;
+    int m_duration = 1;
     Vector2<float> m_origin;
 
     void saveSurface(SDL_Surface *sur_);

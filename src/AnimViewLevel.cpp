@@ -39,10 +39,11 @@ void AnimViewLevel::enter()
     m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_16.png", *renderer);
     m_anim->addFrame(path + "/Resources/MoveProjectileCharAnim_17.png", *renderer);
     m_anim->scaleToHeight(495);
-    m_anim->m_origin = {200, 495};
+    m_anim->m_origin = {m_anim->m_width / 2.0f, 495};
     m_anim->setDuration(60);
 
-    m_anim->setFrame(6, 1);
+    m_anim->setFrame(0, 1);
+    m_anim->setFrame(6, 2);
     m_anim->setFrame(9, 3);
     m_anim->setFrame(14, 4);
     m_anim->setFrame(19, 5);
@@ -57,6 +58,12 @@ void AnimViewLevel::enter()
     m_anim->setFrame(44, 14);
     m_anim->setFrame(48, 15);
     m_anim->setFrame(50, 16);
+
+    m_animFrames.setProps(&m_anim->m_framesData);
+    m_animFrames.setLimits(0, m_anim->m_surfaces.size() - 1);
+
+    vals.push_back(5);
+    vals.push_back(11);
 }
 
 void AnimViewLevel::receiveInput(EVENTS event, const float scale_)
@@ -87,13 +94,112 @@ void AnimViewLevel::receiveMouseMovement(const Vector2<float> &offset_)
 void AnimViewLevel::update()
 {
     m_camera.update();
-    currentFrame++;
+
+    if (m_runAnimation)
+        currentFrame++;
+    
+    if (currentFrame >= m_anim->m_duration)
+    {
+        if (m_loopAnimation)
+            currentFrame = 0;
+        else
+        {
+            currentFrame = m_anim->m_duration - 1;
+            m_runAnimation = false;
+        }
+    }
 
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
-    
-    ImGui::ShowDemoWindow(&m_winOpen);
+
+    ImGui::Begin("Editor", &m_winOpen);
+
+    ImGui::SeparatorText("Animation data");
+
+    int animId = 0;
+    if (m_anim)
+        animId = m_anim->m_framesData[currentFrame % m_anim->m_duration];
+    ImGui::SliderInt((std::string("Frame [") + std::to_string(animId) + "]").c_str(), &currentFrame, 0, (!m_anim ? 0 : m_anim->m_duration - 1));
+
+    if (ImGui::Button("Start"))
+    {
+        m_runAnimation = true;
+
+        if (currentFrame >= m_anim->m_duration - 1)
+            currentFrame = 0;
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Stop"))
+    {
+        m_runAnimation = false;
+    }
+
+    ImGui::SameLine();
+    ImGui::Checkbox("Loop animation", &m_loopAnimation);
+
+    ImGui::SeparatorText("Animation frames");
+
+    m_animFrames.proceed(currentFrame);
+
+    if (ImGui::InputInt("Duration", &m_anim->m_duration))
+    {
+        if (m_anim->m_duration < 1)
+            m_anim->m_duration = 1;
+    }
+
+    ImGui::SeparatorText("Size");
+
+    static int height = m_anim->m_height;
+    if (ImGui::DragInt("Height", &height))
+    {
+        if (height < 1)
+            height = 1;
+
+        m_anim->scaleToHeight(height);
+    }
+
+    if (ImGui::DragInt("Width", &m_anim->m_width))
+    {
+        if (m_anim->m_width < 1)
+            m_anim->m_width = 1;
+    }
+
+    ImGui::SeparatorText("Origin");
+
+    ImGui::DragFloat("X", &m_anim->m_origin.x);
+    ImGui::SameLine();
+    ImGui::DragFloat("Y", &m_anim->m_origin.y);
+
+    if (ImGui::Button("7", {28, 28}))
+        m_anim->m_origin = {0, 0};
+    ImGui::SameLine(0.0f, 4.0f);
+    if (ImGui::Button("8", {28, 28}))
+        m_anim->m_origin = {m_anim->m_width / 2.0f, 0};
+    ImGui::SameLine(0.0f, 4.0f);
+    if (ImGui::Button("9", {28, 28}))
+        m_anim->m_origin = {(float)m_anim->m_width, 0};
+
+    if (ImGui::Button("4", {28, 28}))
+        m_anim->m_origin = {0, m_anim->m_height / 2.0f};
+    ImGui::SameLine(0.0f, 4.0f);
+    if (ImGui::Button("5", {28, 28}))
+        m_anim->m_origin = {m_anim->m_width / 2.0f, m_anim->m_height / 2.0f};
+    ImGui::SameLine(0.0f, 4.0f);
+    if (ImGui::Button("6", {28, 28}))
+        m_anim->m_origin = {(float)m_anim->m_width, m_anim->m_height / 2.0f};
+
+    if (ImGui::Button("1", {28, 28}))
+        m_anim->m_origin = {0, (float)m_anim->m_height};
+    ImGui::SameLine(0.0f, 4.0f);
+    if (ImGui::Button("2", {28, 28}))
+        m_anim->m_origin = {m_anim->m_width / 2.0f, (float)m_anim->m_height};
+    ImGui::SameLine(0.0f, 4.0f);
+    if (ImGui::Button("3", {28, 28}))
+        m_anim->m_origin = {(float)m_anim->m_width, (float)m_anim->m_height};
+
+    ImGui::End();
 }
 
 void AnimViewLevel::draw()
@@ -112,7 +218,8 @@ void AnimViewLevel::draw()
     renderer.drawRectangle({m_size.x / 2.0f - gamedata::global::cameraWidth * gamedata::stages::maxCameraScale / 2.0f, gamedata::stages::stageHeight - gamedata::global::cameraHeight * gamedata::stages::maxCameraScale - 1},
     {gamedata::global::cameraWidth * gamedata::stages::maxCameraScale, gamedata::global::cameraHeight * gamedata::stages::maxCameraScale}, {255, 255, 0, 255}, m_camera);
 
-    //renderer.renderTexture((*m_anim)[currentFrame], m_size.x / 2.0f - m_anim->m_origin.x, gamedata::stages::levelOfGround - m_anim->m_origin.y, m_anim->m_width, m_anim->m_height, m_camera, 0, SDL_FLIP_NONE);
+    if (m_anim->m_frameCount > 0)
+        renderer.renderTexture((*m_anim)[currentFrame], m_size.x / 2.0f - m_anim->m_origin.x, gamedata::stages::levelOfGround - m_anim->m_origin.y, m_anim->m_width, m_anim->m_height, m_camera, 0, SDL_FLIP_NONE);
 
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
 
