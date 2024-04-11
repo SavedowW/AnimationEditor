@@ -20,6 +20,7 @@ public:
     void receiveMouseMovement(const Vector2<float> &offset_) override;
 
     void setDirectory(const std::string &path_);
+    void setAnimFile(const std::string &path_);
 
     ~AnimViewLevel();
 

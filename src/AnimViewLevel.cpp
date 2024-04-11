@@ -15,17 +15,18 @@ void AnimViewLevel::enter()
 {
     Level::enter();
 
-    m_stage = SelectionStage::REORDER_SPRITES;
+    m_stage = SelectionStage::EDIT_ANIM;
 
     m_camera.setPos(gamedata::stages::startingCameraPos);
     m_camera.setScale(gamedata::stages::startingCameraScale);
 
     auto path = m_application->getBasePath();
 
-    setDirectory(path + "/Resources");
+    //setDirectory(path + "/Resources");
 
-    Renderer *renderer = m_application->getRenderer();
     m_anim = new EngineAnimation();
+
+    setAnimFile(path + "/Resources/MoveProjectileCharAnim.panm");
 }
 
 void AnimViewLevel::receiveInput(EVENTS event, const float scale_)
@@ -68,6 +69,16 @@ void AnimViewLevel::setDirectory(const std::string &path_)
             m_sprites.push_back(dirpath);
         }
 	}
+}
+
+void AnimViewLevel::setAnimFile(const std::string &path_)
+{
+    Renderer *renderer = m_application->getRenderer();
+
+    std::filesystem::path dirpath(path_);
+    m_originalPath = dirpath.parent_path().string();
+
+    m_anim->loadAnimation(path_, *renderer);
 }
 
 AnimViewLevel::~AnimViewLevel()
