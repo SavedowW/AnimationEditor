@@ -5,6 +5,12 @@
 #include "EngineAnimation.h"
 #include "ImTimelinePropertyInt.h"
 
+enum class SelectionStage {
+    SELECT_PATH,
+    REORDER_SPRITES,
+    EDIT_ANIM
+};
+
 class AnimViewLevel : public Level
 {
 public:
@@ -12,6 +18,10 @@ public:
     virtual void enter() override;
     void receiveInput(EVENTS event, const float scale_) override;
     void receiveMouseMovement(const Vector2<float> &offset_) override;
+
+    void setDirectory(const std::string &path_);
+
+    ~AnimViewLevel();
 
 protected:
     void update() override;
@@ -26,7 +36,11 @@ protected:
     bool m_loopAnimation = true;
     bool m_runAnimation = true;
 
-    std::vector<int> vals;
+    SelectionStage m_stage;
+
+    std::vector<std::filesystem::path> m_sprites;
+
+    std::string m_originalPath;
 };
 
 #endif

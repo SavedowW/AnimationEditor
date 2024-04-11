@@ -9,6 +9,9 @@ void EngineAnimation::saveAnimation(const std::string &path_, int blurRange_, fl
 {
     m_rw = SDL_RWFromFile(path_.c_str(), "w+b");
 
+    int version = 1;
+
+    SDL_RWwrite(m_rw, &version, sizeof(version), 1);
     SDL_RWwrite(m_rw, &m_width, sizeof(m_width), 1);
     SDL_RWwrite(m_rw, &m_height, sizeof(m_height), 1);
     SDL_RWwrite(m_rw, &m_realWidth, sizeof(m_realWidth), 1);
@@ -45,6 +48,9 @@ void EngineAnimation::loadAnimation(const std::string &path_, Renderer &ren_)
 {
     m_rw = SDL_RWFromFile(path_.c_str(), "r+b");
 
+    int version = 1;
+
+    SDL_RWread(m_rw, &version, sizeof(version), 1);
     SDL_RWread(m_rw, &m_width, sizeof(m_width), 1);
     SDL_RWread(m_rw, &m_height, sizeof(m_height), 1);
     SDL_RWread(m_rw, &m_realWidth, sizeof(m_realWidth), 1);
