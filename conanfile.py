@@ -11,3 +11,4 @@ class SomeSmallFG(ConanFile):
         self.requires("sdl_image/2.0.5")
         self.requires("libpng/1.6.40", override=True)
         self.requires("sdl/2.26.5", override=True)
+        self.requires("lz4/1.9.4")

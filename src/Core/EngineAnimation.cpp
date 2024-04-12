@@ -11,6 +11,10 @@ void EngineAnimation::saveAnimation(const std::string &path_, int blurRange_, fl
 
     int version = 1;
 
+    Uint32 uncompressed_size = m_realWidth * m_realHeight * 4;
+    int max_lz4_size = LZ4_compressBound (uncompressed_size);
+    m_compressionBuffer = new char[max_lz4_size];
+
     SDL_RWwrite(m_rw, &version, sizeof(version), 1);
     SDL_RWwrite(m_rw, &m_width, sizeof(m_width), 1);
     SDL_RWwrite(m_rw, &m_height, sizeof(m_height), 1);
@@ -31,17 +35,27 @@ void EngineAnimation::saveAnimation(const std::string &path_, int blurRange_, fl
     }
     SDL_RWwrite(m_rw, &m_duration, sizeof(m_duration), 1);
 
-    for (int i = 0; i < m_frameCount; ++i)
-        saveSurface(m_surfaces[i]);
-
+    std::cout << "Saving regular sprites\n";
     for (int i = 0; i < m_frameCount; ++i)
     {
-        if (m_whiteSurfaces[i] == nullptr)
-            m_whiteSurfaces[i] = toPureWhite(m_surfaces[i], blurRange_, blurScaler_);
-        saveSurface(m_whiteSurfaces[i]);
+        std::cout << "Sprite " << i + 1 << m_frameCount << std::endl;
+        saveSurfaceLZ4(m_surfaces[i], uncompressed_size, max_lz4_size);
     }
 
+    std::cout << "Saving white sprites\n";
+    for (int i = 0; i < m_frameCount; ++i)
+    {
+        std::cout << "Sprite " << i + 1 << m_frameCount << std::endl;
+        if (m_whiteSurfaces[i] == nullptr)
+            m_whiteSurfaces[i] = toPureWhite(m_surfaces[i], blurRange_, blurScaler_);
+        saveSurfaceLZ4(m_whiteSurfaces[i], uncompressed_size, max_lz4_size);
+    }
+
+    std::cout << "DONE\n";
+
     SDL_RWclose(m_rw);
+
+    delete [] m_compressionBuffer;
 }
 
 void EngineAnimation::loadAnimation(const std::string &path_, Renderer &ren_)
@@ -75,14 +89,14 @@ void EngineAnimation::loadAnimation(const std::string &path_, Renderer &ren_)
 
     for (int i = 0; i < m_frameCount; ++i)
     {
-        SDL_Surface *tmp = loadSurface();
+        SDL_Surface *tmp = loadSurfaceLZ4();
         m_surfaces.push_back(tmp);
         m_textures.push_back(ren_.createTextureFromSurface(tmp));
     }
 
     for (int i = 0; i < m_frameCount; ++i)
     {
-        SDL_Surface *tmp = loadSurface();
+        SDL_Surface *tmp = loadSurfaceLZ4();
         m_whiteSurfaces.push_back(tmp);
     }
 
@@ -141,35 +155,54 @@ EngineAnimation::~EngineAnimation()
         SDL_DestroyTexture(el);
 }
 
-void EngineAnimation::saveSurface(SDL_Surface *sur_)
+void EngineAnimation::saveSurfaceLZ4(SDL_Surface *sur_, Uint32 uncompressed_size_, int max_lz4_size_)
 {
     SDL_Surface *surcpy = SDL_ConvertSurfaceFormat(sur_, SDL_PIXELFORMAT_ARGB8888, 0);
 
-    auto sz = surcpy->h * surcpy->w;
-    std::cout << "Writing " << sz << " bytes\n";
-    auto res = SDL_RWwrite(m_rw, surcpy->pixels, 4, sz);
+    const char* uncompressed_buffer = (const char*)(surcpy->pixels);
+    
+    int true_size = LZ4_compress_HC(uncompressed_buffer, m_compressionBuffer,
+                                uncompressed_size_, max_lz4_size_,
+                                LZ4HC_CLEVEL_MAX);
 
-    std::cout << res << std::endl;
-    if (res < sz)
+    auto sz = surcpy->h * surcpy->w;
+    SDL_RWwrite(m_rw, &(true_size), sizeof(true_size), 1);
+    auto res = SDL_RWwrite(m_rw, m_compressionBuffer, 1, true_size);
+
+    if (res < true_size)
     {
+        std::cout << "Writing " << true_size << " bytes\n";
+        std::cout << res << std::endl;
         std::cout << SDL_GetError() << std::endl;
     }
 
     SDL_FreeSurface(surcpy);
 }
 
-SDL_Surface *EngineAnimation::loadSurface()
+SDL_Surface *EngineAnimation::loadSurfaceLZ4()
 {
     SDL_Surface *tar = SDL_CreateRGBSurface(0, m_realWidth, m_realHeight, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-    auto sz = tar->h * tar->w;
+    Uint32 uncompressed_size = tar->w * tar->h * tar->format->BytesPerPixel;
 
-    auto res = SDL_RWread(m_rw, tar->pixels, 4, sz);
-    std::cout << res << std::endl;
+    int compressed_size;
+    SDL_RWread (m_rw, &compressed_size, sizeof(compressed_size), 1);
+
+    char* compressed_buffer = new char[compressed_size];
+    auto res = SDL_RWread(m_rw, compressed_buffer, 1, compressed_size);
     if (res == 0)
     {
+        std::cout << res << std::endl;
         std::cout << SDL_GetError() << std::endl;
+        SDL_FreeSurface(tar);
+        delete [] compressed_buffer;
+        return nullptr;
     }
 
+    char* uncompressed_buffer = (char*)(tar->pixels);
+    LZ4_decompress_safe(compressed_buffer, uncompressed_buffer, compressed_size, uncompressed_size);
+
+
+    delete [] compressed_buffer;
     return tar;
 }
 

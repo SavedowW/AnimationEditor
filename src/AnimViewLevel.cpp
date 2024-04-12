@@ -15,18 +15,15 @@ void AnimViewLevel::enter()
 {
     Level::enter();
 
-    m_stage = SelectionStage::EDIT_ANIM;
+    m_stage = SelectionStage::SELECT_PATH;
 
     m_camera.setPos(gamedata::stages::startingCameraPos);
     m_camera.setScale(gamedata::stages::startingCameraScale);
 
     auto path = m_application->getBasePath();
 
-    //setDirectory(path + "/Resources");
 
     m_anim = new EngineAnimation();
-
-    setAnimFile(path + "/Resources/MoveProjectileCharAnim.panm");
 }
 
 void AnimViewLevel::receiveInput(EVENTS event, const float scale_)
@@ -69,6 +66,8 @@ void AnimViewLevel::setDirectory(const std::string &path_)
             m_sprites.push_back(dirpath);
         }
 	}
+
+    m_stage = SelectionStage::REORDER_SPRITES;
 }
 
 void AnimViewLevel::setAnimFile(const std::string &path_)
@@ -79,6 +78,8 @@ void AnimViewLevel::setAnimFile(const std::string &path_)
     m_originalPath = dirpath.parent_path().string();
 
     m_anim->loadAnimation(path_, *renderer);
+
+    m_stage = SelectionStage::EDIT_ANIM;
 }
 
 AnimViewLevel::~AnimViewLevel()
@@ -94,7 +95,32 @@ void AnimViewLevel::update()
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    if (m_stage == SelectionStage::EDIT_ANIM)
+    if (m_stage == SelectionStage::SELECT_PATH)
+    {
+        ImGui::Begin("Sprite order", &m_winOpen);
+
+        ImGui::SeparatorText("Create new animation");
+        static char filebuf[1024];
+
+        ImGui::PushItemWidth(400);
+        ImGui::InputText("Folder path", filebuf, 1024);
+        if (ImGui::Button("Load sprites"))
+        {
+            setDirectory(std::string(filebuf));
+        }
+
+        ImGui::SeparatorText("Load existing animation");
+
+        ImGui::PushItemWidth(400);
+        ImGui::InputText("*.panm file path", filebuf, 1024);
+        if (ImGui::Button("Load animation"))
+        {
+            setAnimFile(std::string(filebuf));
+        }
+
+        ImGui::End();
+    }
+    else if (m_stage == SelectionStage::EDIT_ANIM)
     {
         if (m_runAnimation)
             currentFrame++;

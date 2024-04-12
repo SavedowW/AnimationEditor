@@ -3,6 +3,9 @@
 
 #include "Renderer.h"
 #include "TimelineProperty.h"
+#include "lz4.h"
+#include "lz4frame.h"
+#include "lz4hc.h"
 
 class EngineAnimation
 {
@@ -38,9 +41,11 @@ public:
     int m_duration = 1;
     Vector2<float> m_origin;
 
-    void saveSurface(SDL_Surface *sur_);
+    void saveSurfaceLZ4(SDL_Surface *sur_, Uint32 uncompressed_size_, int max_lz4_size_);
+    SDL_Surface *loadSurfaceLZ4();
 
-    SDL_Surface *loadSurface();
+
+    char *m_compressionBuffer = nullptr;
 
     // Create pure white version of surface
     SDL_Surface *toPureWhite(SDL_Surface *sur_, int blurRange_, float blurScaler_);
