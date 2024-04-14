@@ -16,6 +16,7 @@ This project is essentially a yet another custom animation editor for SDL2, whic
 - LZ4
 - Cmake
 - ImGUI
+
 All dependencies are included in conanfile except ImGUI, which is included as a git submodule
 # Building
 Assuming that you have CMake and conan installed and configured and you are in the project folder, run this:
