@@ -30,6 +30,7 @@ public:
     std::pair<uint32_t, T> &getValuePair(int id_);
     void setPairValue(int id_, T &&value_);
     bool deletePair(int id_);
+    void clear();
 
 private:
     std::vector<std::pair<uint32_t, T>> m_values;

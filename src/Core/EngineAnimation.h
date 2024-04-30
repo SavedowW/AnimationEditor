@@ -24,6 +24,8 @@ public:
 
     SDL_Texture *operator[](uint32_t frame_);
 
+    void clear();
+
     ~EngineAnimation();
 
 //private:

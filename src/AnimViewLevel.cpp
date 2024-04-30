@@ -2,6 +2,75 @@
 #include "Application.h"
 #include <algorithm>
 
+std::string findNextFile(const std::filesystem::path &dir_, const std::string &currentFile)
+{
+    std::string firstItem = "";
+    bool passedCurrent = false;
+    for (const auto &el : std::filesystem::directory_iterator(dir_))
+    {
+        auto filename = el.path().filename().string();
+
+        if (firstItem == "")
+            firstItem = filename;
+        
+        if (filename == currentFile)
+            passedCurrent = true;
+        else if (passedCurrent)
+            return filename;
+    }
+
+    return firstItem;
+}
+
+int FileTabCompletition(ImGuiInputTextCallbackData* data_)
+{
+    std::string selected = data_->Buf;
+    
+    if (std::filesystem::exists(selected))
+    {
+        std::filesystem::path selobj(selected);
+        if (std::filesystem::is_directory(selobj) && (selected[selected.size() - 1] == '/' || selected[selected.size() - 1] == '\\'))
+        {
+            for (const auto &el : std::filesystem::directory_iterator(selected))
+            {
+                auto entryFilename = el.path().filename().string();
+                data_->InsertChars(data_->BufTextLen, entryFilename.c_str());
+                break;
+            }
+        }
+        else
+        {
+            std::filesystem::path origpath(selected);
+            std::filesystem::path par = origpath.parent_path();
+            std::string filename = origpath.filename().string();
+            auto nextItem = findNextFile(par, filename);
+            data_->DeleteChars(par.string().size() + 1, filename.size());
+            data_->InsertChars(data_->BufTextLen, nextItem.c_str());
+        }
+    }
+    else
+    {
+        std::filesystem::path origpath(selected);
+        std::filesystem::path par = origpath.parent_path();
+        std::string filename = origpath.filename().string();
+        if (std::filesystem::exists(par))
+        {
+            for (const auto &el : std::filesystem::directory_iterator(par))
+            {
+                auto entryFilename = el.path().filename().string();
+                if (entryFilename.find(filename) == 0)
+                {
+                    data_->DeleteChars(par.string().size() + 1, filename.size());
+                    data_->InsertChars(data_->BufTextLen, entryFilename.c_str());
+                    break;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
 AnimViewLevel::AnimViewLevel(Application *application_, const Vector2<float> &size_, int lvlId_) :
     Level(application_, size_, lvlId_),
     m_camera(gamedata::stages::startingCameraPos, {gamedata::global::cameraWidth, gamedata::global::cameraHeight}, m_size)
@@ -68,6 +137,10 @@ void AnimViewLevel::setDirectory(const std::string &path_)
 	}
 
     m_stage = SelectionStage::REORDER_SPRITES;
+
+    std::filesystem::path dirpath(path_);
+    auto filename = dirpath.filename().string() + ".panm";
+    filename.copy(m_filename, 1024);
 }
 
 void AnimViewLevel::setAnimFile(const std::string &path_)
@@ -80,6 +153,20 @@ void AnimViewLevel::setAnimFile(const std::string &path_)
     m_anim->loadAnimation(path_, *renderer);
 
     m_stage = SelectionStage::EDIT_ANIM;
+
+    m_animFrames.setProps(&m_anim->m_framesData);
+    m_animFrames.setLimits(0, m_anim->m_surfaces.size() - 1);
+
+    auto filename = dirpath.filename().string();
+    filename.copy(m_filename, 1024);
+}
+
+void AnimViewLevel::returnToStart()
+{
+    m_sprites.clear();
+    delete m_anim;
+    m_anim = new EngineAnimation();
+    m_stage = SelectionStage::SELECT_PATH;
 }
 
 AnimViewLevel::~AnimViewLevel()
@@ -100,22 +187,23 @@ void AnimViewLevel::update()
         ImGui::Begin("Sprite order", &m_winOpen);
 
         ImGui::SeparatorText("Create new animation");
-        static char filebuf[1024];
+        static char dirname[1024];
+        static char filename[1024];
 
         ImGui::PushItemWidth(400);
-        ImGui::InputText("Folder path", filebuf, 1024);
+        ImGui::InputText("Folder path", dirname, 1024, ImGuiInputTextFlags_CallbackCompletion, FileTabCompletition);
         if (ImGui::Button("Load sprites"))
         {
-            setDirectory(std::string(filebuf));
+            setDirectory(std::string(dirname));
         }
 
         ImGui::SeparatorText("Load existing animation");
 
         ImGui::PushItemWidth(400);
-        ImGui::InputText("*.panm file path", filebuf, 1024);
+        ImGui::InputText("*.panm file path", filename, 1024, ImGuiInputTextFlags_CallbackCompletion, FileTabCompletition);
         if (ImGui::Button("Load animation"))
         {
-            setAnimFile(std::string(filebuf));
+            setAnimFile(std::string(filename));
         }
 
         ImGui::End();
@@ -222,16 +310,21 @@ void AnimViewLevel::update()
         if (ImGui::Button("3", {28, 28}))
             m_anim->m_origin = {(float)m_anim->m_width, (float)m_anim->m_height};
 
-        static char filebuf[1024];
         ImGui::PushItemWidth(300);
         ImGui::SeparatorText("Output");
-        ImGui::InputText("File name", filebuf, 1024);
+        ImGui::InputText("File name", m_filename, 1024);
         if (ImGui::Button("Export"))
         {
-            std::string flnm(filebuf);
+            std::string flnm(m_filename);
             std::cout << flnm << std::endl;
-            m_anim->saveAnimation(m_originalPath + "/" + filebuf, 5, 1.2);
+            m_anim->saveAnimation(m_originalPath + "/" + m_filename, 5, 1.2);
             std::cout << "SAVED\n";
+        }
+
+        ImGui::SeparatorText("Misc");
+        if (ImGui::Button("Return"))
+        {
+            returnToStart();
         }
 
         ImGui::End();
@@ -297,6 +390,8 @@ void AnimViewLevel::draw()
 
     renderer.drawRectangle({0, gamedata::stages::levelOfGround}, {m_size.x, 2}, {0, 0, 200, 255}, m_camera);
     renderer.drawRectangle({m_size.x / 2.0f, 0.0f}, {2.0f, m_size.y}, {0, 0, 200, 255}, m_camera);
+    renderer.drawRectangle({0, gamedata::stages::levelOfGround - 350}, {m_size.x, 1}, {0, 0, 200, 255}, m_camera);
+    renderer.drawRectangle({0, gamedata::stages::levelOfGround - 175}, {m_size.x, 1}, {0, 0, 200, 255}, m_camera);
 
     renderer.drawRectangle({m_size.x / 2.0f - gamedata::global::cameraWidth * gamedata::stages::minCameraScale / 2.0f, gamedata::stages::stageHeight - gamedata::global::cameraHeight * gamedata::stages::minCameraScale - 1},
     {gamedata::global::cameraWidth * gamedata::stages::minCameraScale, gamedata::global::cameraHeight * gamedata::stages::minCameraScale}, {255, 255, 0, 255}, m_camera);

@@ -21,6 +21,7 @@ public:
 
     void setDirectory(const std::string &path_);
     void setAnimFile(const std::string &path_);
+    void returnToStart();
 
     ~AnimViewLevel();
 
@@ -40,6 +41,8 @@ protected:
     SelectionStage m_stage;
 
     std::vector<std::filesystem::path> m_sprites;
+
+    char m_filename[1024] = {"\0"};
 
     std::string m_originalPath;
 };

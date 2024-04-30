@@ -135,6 +135,13 @@ bool TimelineProperty<T>::deletePair(int id_)
     return true;
 }
 
+template <typename T>
+void TimelineProperty<T>::clear()
+{
+    m_values.clear();
+    m_isEmpty = true;
+}
+
 template<typename T>
 bool TimelineProperty<T>::isEmpty() const
 {

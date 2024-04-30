@@ -38,14 +38,14 @@ void EngineAnimation::saveAnimation(const std::string &path_, int blurRange_, fl
     std::cout << "Saving regular sprites\n";
     for (int i = 0; i < m_frameCount; ++i)
     {
-        std::cout << "Sprite " << i + 1 << m_frameCount << std::endl;
+        std::cout << "Sprite " << i + 1 << " / " << m_frameCount << std::endl;
         saveSurfaceLZ4(m_surfaces[i], uncompressed_size, max_lz4_size);
     }
 
     std::cout << "Saving white sprites\n";
     for (int i = 0; i < m_frameCount; ++i)
     {
-        std::cout << "Sprite " << i + 1 << m_frameCount << std::endl;
+        std::cout << "Sprite " << i + 1 << " / " << m_frameCount << std::endl;
         if (m_whiteSurfaces[i] == nullptr)
             m_whiteSurfaces[i] = toPureWhite(m_surfaces[i], blurRange_, blurScaler_);
         saveSurfaceLZ4(m_whiteSurfaces[i], uncompressed_size, max_lz4_size);
@@ -143,13 +143,44 @@ SDL_Texture *EngineAnimation::operator[](uint32_t frame_)
     return m_textures[m_framesData[frame_ % m_duration]];
 }
 
+void EngineAnimation::clear()
+{
+    for (auto &el : m_surfaces)
+        if (el)
+            SDL_FreeSurface(el);
+
+    for (auto &el : m_whiteSurfaces)
+        if (el)
+            SDL_FreeSurface(el);
+
+    for (auto &el : m_textures)
+        if (el)
+            SDL_DestroyTexture(el);
+
+    m_surfaces.clear();
+    m_whiteSurfaces.clear();
+    m_textures.clear();
+
+    m_width = 1;
+    m_height = 1;
+    m_realWidth = 1;
+    m_realHeight = 1;
+    m_frameCount = 0;
+    m_rw = nullptr;
+    m_framesData.clear();
+    m_duration = 1;
+    m_origin = {0.0f, 0.0f};
+    m_compressionBuffer = nullptr;
+}
+
 EngineAnimation::~EngineAnimation()
 {
     for (auto *el : m_surfaces)
         SDL_FreeSurface(el);
 
     for (auto *el : m_whiteSurfaces)
-        SDL_FreeSurface(el);
+        if (el)
+            SDL_FreeSurface(el);
 
     for (auto *el : m_textures)
         SDL_DestroyTexture(el);
