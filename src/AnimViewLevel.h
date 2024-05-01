@@ -4,6 +4,7 @@
 #include "Level.h"
 #include "EngineAnimation.h"
 #include "ImTimelinePropertyInt.h"
+#include "DBManager.h"
 
 enum class SelectionStage {
     SELECT_PATH,
@@ -22,6 +23,7 @@ public:
     void setDirectory(const std::string &path_);
     void setAnimFile(const std::string &path_);
     void returnToStart();
+    void updateLastFilesList();
 
     ~AnimViewLevel();
 
@@ -45,6 +47,10 @@ protected:
     char m_filename[1024] = {"\0"};
 
     std::string m_originalPath;
+
+    DBManager m_db;
+
+    std::vector<filedata> m_lastFiles;
 };
 
 #endif

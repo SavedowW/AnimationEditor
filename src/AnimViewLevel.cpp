@@ -73,7 +73,8 @@ int FileTabCompletition(ImGuiInputTextCallbackData* data_)
 
 AnimViewLevel::AnimViewLevel(Application *application_, const Vector2<float> &size_, int lvlId_) :
     Level(application_, size_, lvlId_),
-    m_camera(gamedata::stages::startingCameraPos, {gamedata::global::cameraWidth, gamedata::global::cameraHeight}, m_size)
+    m_camera(gamedata::stages::startingCameraPos, {gamedata::global::cameraWidth, gamedata::global::cameraHeight}, m_size),
+    m_db(std::shared_ptr<DBAccessor>(new DBAccessor("editor.db")))
 {
     subscribe(EVENTS::RMB);
     subscribe(EVENTS::MOUSE_MOVEMENT);
@@ -91,8 +92,9 @@ void AnimViewLevel::enter()
 
     auto path = m_application->getBasePath();
 
-
     m_anim = new EngineAnimation();
+
+    updateLastFilesList();
 }
 
 void AnimViewLevel::receiveInput(EVENTS event, const float scale_)
@@ -159,6 +161,8 @@ void AnimViewLevel::setAnimFile(const std::string &path_)
 
     auto filename = dirpath.filename().string();
     filename.copy(m_filename, 1024);
+
+    m_db.pushFile(path_, filename);
 }
 
 void AnimViewLevel::returnToStart()
@@ -167,6 +171,12 @@ void AnimViewLevel::returnToStart()
     delete m_anim;
     m_anim = new EngineAnimation();
     m_stage = SelectionStage::SELECT_PATH;
+    updateLastFilesList();
+}
+
+void AnimViewLevel::updateLastFilesList()
+{
+    m_lastFiles = m_db.getFileManager().getLastFiles(10);
 }
 
 AnimViewLevel::~AnimViewLevel()
@@ -204,6 +214,13 @@ void AnimViewLevel::update()
         if (ImGui::Button("Load animation"))
         {
             setAnimFile(std::string(filename));
+        }
+
+        ImGui::SeparatorText("Existing animations");
+        for (auto &el : m_lastFiles)
+        {
+            if (ImGui::Selectable(el.filepath.c_str()))
+                setAnimFile(el.filepath);
         }
 
         ImGui::End();
@@ -319,6 +336,7 @@ void AnimViewLevel::update()
             std::cout << flnm << std::endl;
             m_anim->saveAnimation(m_originalPath + "/" + m_filename, 5, 1.2);
             std::cout << "SAVED\n";
+            m_db.pushFile(m_originalPath + "/" + m_filename, flnm);
         }
 
         ImGui::SeparatorText("Misc");

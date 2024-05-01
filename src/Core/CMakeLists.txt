@@ -19,6 +19,9 @@ ResourceCounter.cpp
 StateMarker.cpp
 Level.cpp
 EngineAnimation.cpp
+DBAccessor.cpp
+DBManager.cpp
+UsedFilesManager.cpp
 )
 
 add_library (Core ${CORE_SRC_FILES})

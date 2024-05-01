@@ -7,6 +7,7 @@ project(${PROJECT_NAME})
 find_package(SDL2 REQUIRED)
 find_package(SDL2_IMAGE REQUIRED)
 find_package(lz4 REQUIRED)
+find_package(SQLite3 REQUIRED)
 
 set(SRC_FILES 
 main.cpp
@@ -28,6 +29,7 @@ ${CMAKE_CURRENT_LIST_DIR}/Core
 ${CMAKE_SOURCE_DIR}/external/imgui
 ${CMAKE_SOURCE_DIR}/external/imgui/backends
 ${CMAKE_SOURCE_DIR}/external/imgui/misc/cpp
+${SQLite3_INCLUDE_DIRS}
 )
 
 set(LINK_LIBRARIES
@@ -35,6 +37,7 @@ ${sdl_LIBRARIES_DEBUG}
 SDL2::SDL2
 SDL2_image::SDL2_image
 LZ4::lz4_static
+${SQLite3_LIBRARIES}
 )
 
 message(${LINK_LIBRARIES})

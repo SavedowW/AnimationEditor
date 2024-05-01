@@ -7,9 +7,6 @@
 
 int main(int argc, char* args[])
 {
-    for (const auto &el : std::filesystem::directory_iterator("C:/xampp/"))
-        std::cout << el << std::endl;
-
     Application app;
     std::cout << app.getBasePath() << std::endl;
 
