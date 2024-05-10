@@ -66,7 +66,7 @@ void InputSystem::handleInput()
 			{
 				if (sub->isInputEnabled())
 				{
-					sub->receiveMouseMovement(offset);
+					sub->receiveMouseMovement(offset, {(float)e.motion.x, (float)e.motion.y});
 				}
 			}
 		}
@@ -112,7 +112,7 @@ void InputReactor::receiveInput(EVENTS event, const float scale_)
 {
 }
 
-void InputReactor::receiveMouseMovement(const Vector2<float> &offset_)
+void InputReactor::receiveMouseMovement(const Vector2<float> &offset_, const Vector2<float> &pos_)
 {
 }
 

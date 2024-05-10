@@ -2,7 +2,7 @@
 
 DBAccessor::DBAccessor(const std::string &filename_)
 {
-    int exit = sqlite3_open("example.db", &m_db); 
+    int exit = sqlite3_open(filename_.c_str(), &m_db); 
   
     if (exit) { 
         std::cerr << "Error open DB " << sqlite3_errmsg(m_db) << std::endl; 

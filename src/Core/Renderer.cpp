@@ -189,6 +189,14 @@ void Renderer::drawGeometry(SDL_Texture *texture, const SDL_Vertex *vertices, in
 	}
 }
 
+void Renderer::drawLine(const Vector2<float> &p1_, const Vector2<float> &p2_, const SDL_Color &col_, const Camera &cam_)
+{
+	auto lineP1 = ((p1_ - cam_.getTopLeft()) / cam_.getScale());
+	auto lineP2 = ((p2_ - cam_.getTopLeft()) / cam_.getScale());
+	SDL_SetRenderDrawColor(m_renderer, col_.r, col_.g, col_.b, col_.a);
+	SDL_RenderDrawLineF(m_renderer, lineP1.x, lineP1.y, lineP2.x, lineP2.y);
+}
+
 void Renderer::fillRenderer(const SDL_Color& col_)
 {
 	SDL_SetRenderDrawColor(m_renderer, col_.r, col_.g, col_.b, col_.a);

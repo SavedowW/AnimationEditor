@@ -5,6 +5,7 @@
 #include "EngineAnimation.h"
 #include "ImTimelinePropertyInt.h"
 #include "DBManager.h"
+#include "GuidelineManager.h"
 
 enum class SelectionStage {
     SELECT_PATH,
@@ -18,7 +19,7 @@ public:
     AnimViewLevel(Application *application_, const Vector2<float> &size_, int lvlId_);
     virtual void enter() override;
     void receiveInput(EVENTS event, const float scale_) override;
-    void receiveMouseMovement(const Vector2<float> &offset_) override;
+    void receiveMouseMovement(const Vector2<float> &offset_, const Vector2<float> &pos_) override;
 
     void setDirectory(const std::string &path_);
     void setAnimFile(const std::string &path_);
@@ -51,6 +52,8 @@ protected:
     DBManager m_db;
 
     std::vector<filedata> m_lastFiles;
+
+    GuidelineManager m_guidelineManager;
 };
 
 #endif

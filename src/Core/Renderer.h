@@ -37,6 +37,7 @@ public:
 	void fillRectangle(const Vector2<float> &pos_, const Vector2<float> &size_, const SDL_Color& col_, const Camera &cam_);
 	void fillRectangle(const Vector2<float> &pos_, const Vector2<float> &size_, const SDL_Color& col_);
 	void drawGeometry(SDL_Texture *texture, const SDL_Vertex *vertices, int num_vertices, const int *indices, int num_indices);
+	void drawLine(const Vector2<float> &p1_, const Vector2<float> &p2_, const SDL_Color& col_, const Camera &cam_);
 
 	//Global render
 	void fillRenderer(const SDL_Color &col_);

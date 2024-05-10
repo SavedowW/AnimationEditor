@@ -13,6 +13,7 @@ set(SRC_FILES
 main.cpp
 AnimViewLevel.cpp
 ImTimelinePropertyInt.cpp
+GuidelineManager.cpp
 ${CMAKE_SOURCE_DIR}/external/imgui/imgui_demo.cpp
 ${CMAKE_SOURCE_DIR}/external/imgui/imgui_draw.cpp
 ${CMAKE_SOURCE_DIR}/external/imgui/imgui_tables.cpp

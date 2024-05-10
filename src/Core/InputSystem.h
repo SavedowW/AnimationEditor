@@ -99,7 +99,7 @@ public:
 	}
 
 	virtual void receiveInput(EVENTS event, const float scale_);
-	virtual void receiveMouseMovement(const Vector2<float> &offset_);
+	virtual void receiveMouseMovement(const Vector2<float> &offset_, const Vector2<float> &pos_);
 
 	//All events reactor is subscribed at
 	std::set<EVENTS> subscribed_at;

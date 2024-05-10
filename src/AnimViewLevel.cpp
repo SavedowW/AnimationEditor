@@ -74,11 +74,17 @@ int FileTabCompletition(ImGuiInputTextCallbackData* data_)
 AnimViewLevel::AnimViewLevel(Application *application_, const Vector2<float> &size_, int lvlId_) :
     Level(application_, size_, lvlId_),
     m_camera(gamedata::stages::startingCameraPos, {gamedata::global::cameraWidth, gamedata::global::cameraHeight}, m_size),
-    m_db(std::shared_ptr<DBAccessor>(new DBAccessor("editor.db")))
+    m_db(std::shared_ptr<DBAccessor>(new DBAccessor("editor.db"))),
+    m_guidelineManager(m_size)
 {
     subscribe(EVENTS::RMB);
     subscribe(EVENTS::MOUSE_MOVEMENT);
     subscribe(EVENTS::WHEEL_SCROLL);
+
+    m_guidelineManager.addGuideline({Guideline::LineAxis::HORIZONTAL, gamedata::stages::levelOfGround});
+    m_guidelineManager.addGuideline({Guideline::LineAxis::VERTICAL, m_size.x / 2.0f});
+    m_guidelineManager.addGuideline({Guideline::LineAxis::HORIZONTAL, gamedata::stages::levelOfGround - 350});
+    m_guidelineManager.addGuideline({Guideline::LineAxis::HORIZONTAL, gamedata::stages::levelOfGround - 175});
 }
 
 void AnimViewLevel::enter()
@@ -114,12 +120,14 @@ void AnimViewLevel::receiveInput(EVENTS event, const float scale_)
     }
 }
 
-void AnimViewLevel::receiveMouseMovement(const Vector2<float> &offset_)
+void AnimViewLevel::receiveMouseMovement(const Vector2<float> &offset_, const Vector2<float> &pos_)
 {
     if (m_holdingCamera)
     {
         m_camera.setPos(m_camera.getPos() - offset_);
     }
+
+    m_guidelineManager.updateMousePos(pos_ * m_camera.getScale() + m_camera.getTopLeft());
 }
 
 void AnimViewLevel::setDirectory(const std::string &path_)
@@ -406,16 +414,18 @@ void AnimViewLevel::draw()
     auto &renderer = *m_application->getRenderer();
     renderer.fillRenderer(SDL_Color{ 25, 25, 25, 255 });
 
-    renderer.drawRectangle({0, gamedata::stages::levelOfGround}, {m_size.x, 2}, {0, 0, 200, 255}, m_camera);
-    renderer.drawRectangle({m_size.x / 2.0f, 0.0f}, {2.0f, m_size.y}, {0, 0, 200, 255}, m_camera);
-    renderer.drawRectangle({0, gamedata::stages::levelOfGround - 350}, {m_size.x, 1}, {0, 0, 200, 255}, m_camera);
-    renderer.drawRectangle({0, gamedata::stages::levelOfGround - 175}, {m_size.x, 1}, {0, 0, 200, 255}, m_camera);
+    /*renderer.drawLine({0, gamedata::stages::levelOfGround}, {m_size.x, gamedata::stages::levelOfGround}, {0, 0, 200, 255}, m_camera);
+    renderer.drawLine({m_size.x / 2.0f, 0.0f}, {m_size.x / 2.0f, m_size.y}, {0, 0, 200, 255}, m_camera);
+    renderer.drawLine({0, gamedata::stages::levelOfGround - 350}, {m_size.x, gamedata::stages::levelOfGround - 350}, {0, 0, 200, 255}, m_camera);
+    renderer.drawLine({0, gamedata::stages::levelOfGround - 175}, {m_size.x, gamedata::stages::levelOfGround - 175}, {0, 0, 200, 255}, m_camera);*/
 
     renderer.drawRectangle({m_size.x / 2.0f - gamedata::global::cameraWidth * gamedata::stages::minCameraScale / 2.0f, gamedata::stages::stageHeight - gamedata::global::cameraHeight * gamedata::stages::minCameraScale - 1},
     {gamedata::global::cameraWidth * gamedata::stages::minCameraScale, gamedata::global::cameraHeight * gamedata::stages::minCameraScale}, {255, 255, 0, 255}, m_camera);
     
     renderer.drawRectangle({m_size.x / 2.0f - gamedata::global::cameraWidth * gamedata::stages::maxCameraScale / 2.0f, gamedata::stages::stageHeight - gamedata::global::cameraHeight * gamedata::stages::maxCameraScale - 1},
     {gamedata::global::cameraWidth * gamedata::stages::maxCameraScale, gamedata::global::cameraHeight * gamedata::stages::maxCameraScale}, {255, 255, 0, 255}, m_camera);
+
+    m_guidelineManager.draw(renderer, m_camera);
 
     if (m_anim->m_frameCount > 0)
         renderer.renderTexture((*m_anim)[currentFrame], m_size.x / 2.0f - m_anim->m_origin.x, gamedata::stages::levelOfGround - m_anim->m_origin.y, m_anim->m_width, m_anim->m_height, m_camera, 0, SDL_FLIP_NONE);
