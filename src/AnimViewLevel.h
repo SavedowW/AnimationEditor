@@ -5,7 +5,7 @@
 #include "EngineAnimation.h"
 #include "ImTimelinePropertyInt.h"
 #include "DBManager.h"
-#include "GuidelineManager.h"
+#include "GuidelineViewer.h"
 
 enum class SelectionStage {
     SELECT_PATH,
@@ -53,7 +53,7 @@ protected:
 
     std::vector<filedata> m_lastFiles;
 
-    GuidelineManager m_guidelineManager;
+    GuidelineViewer m_guidelineManager;
 };
 
 #endif

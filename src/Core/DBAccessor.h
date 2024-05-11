@@ -10,6 +10,7 @@ public:
     DBAccessor(const std::string &filename_);
     sqlite3_stmt *prepareStmt(const std::string &line);
     const char *getErr();
+    sqlite3_int64 getLastInsertedID();
 
     ~DBAccessor();
 

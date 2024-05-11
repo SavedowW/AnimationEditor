@@ -3,7 +3,8 @@
 
 DBManager::DBManager(std::shared_ptr<DBAccessor> db_) :
     m_db(db_),
-    m_filemanager(db_)
+    m_filemanager(db_),
+    m_guidelineManager(db_)
 {
     auto *stmt = m_db->prepareStmt(
     "CREATE TABLE IF NOT EXISTS used_files (  "
@@ -14,8 +15,19 @@ DBManager::DBManager(std::shared_ptr<DBAccessor> db_) :
     );
 
     sqlite3_step(stmt);
-
     sqlite3_finalize(stmt);
+
+    stmt = m_db->prepareStmt(
+    "CREATE TABLE IF NOT EXISTS guidelines ( "
+	"guideline_id INTEGER PRIMARY KEY, "
+	"is_vertical INTEGER NOT NULL, "
+	"coord REAL NOT NULL )"
+    );
+
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    m_guidelineManager.getGuidelines();
 }
 
 void DBManager::pushFile(const std::string &filepath_, const std::string &filename_)
@@ -33,4 +45,9 @@ void DBManager::pushFile(const std::string &filepath_, const std::string &filena
 UsedFilesManager &DBManager::getFileManager()
 {
     return m_filemanager;
+}
+
+GuidelinesManager *DBManager::getGuidelineManager()
+{
+    return &m_guidelineManager;
 }

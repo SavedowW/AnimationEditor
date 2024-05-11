@@ -24,6 +24,11 @@ const char *DBAccessor::getErr()
     return sqlite3_errmsg(m_db);
 }
 
+sqlite3_int64 DBAccessor::getLastInsertedID()
+{
+    return sqlite3_last_insert_rowid(m_db);
+}
+
 DBAccessor::~DBAccessor()
 {
     if (m_db)

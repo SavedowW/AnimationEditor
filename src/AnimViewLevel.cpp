@@ -75,16 +75,12 @@ AnimViewLevel::AnimViewLevel(Application *application_, const Vector2<float> &si
     Level(application_, size_, lvlId_),
     m_camera(gamedata::stages::startingCameraPos, {gamedata::global::cameraWidth, gamedata::global::cameraHeight}, m_size),
     m_db(std::shared_ptr<DBAccessor>(new DBAccessor("editor.db"))),
-    m_guidelineManager(m_size)
+    m_guidelineManager(m_size, m_db.getGuidelineManager())
 {
     subscribe(EVENTS::RMB);
+    subscribe(EVENTS::LMB);
     subscribe(EVENTS::MOUSE_MOVEMENT);
     subscribe(EVENTS::WHEEL_SCROLL);
-
-    m_guidelineManager.addGuideline({Guideline::LineAxis::HORIZONTAL, gamedata::stages::levelOfGround});
-    m_guidelineManager.addGuideline({Guideline::LineAxis::VERTICAL, m_size.x / 2.0f});
-    m_guidelineManager.addGuideline({Guideline::LineAxis::HORIZONTAL, gamedata::stages::levelOfGround - 350});
-    m_guidelineManager.addGuideline({Guideline::LineAxis::HORIZONTAL, gamedata::stages::levelOfGround - 175});
 }
 
 void AnimViewLevel::enter()
@@ -117,6 +113,13 @@ void AnimViewLevel::receiveInput(EVENTS event, const float scale_)
     else if (event == EVENTS::WHEEL_SCROLL)
     {
         m_camera.setScale(utils::clamp(m_camera.getScale() + scale_ * -0.1f, gamedata::stages::minCameraScale, gamedata::stages::maxCameraScale));
+    }
+    else if (event == EVENTS::LMB)
+    {
+        if (scale_ > 0)
+            m_guidelineManager.attachLine();
+        else
+            m_guidelineManager.detachLine();
     }
 }
 
@@ -200,8 +203,21 @@ void AnimViewLevel::update()
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
+    // Guideline window
+
+    ImGui::SetNextWindowPos(ImVec2(1290, 10));
+    ImGui::SetNextWindowSize(ImVec2(300, 500));
+
+    ImGui::Begin("Guideline editing", &m_winOpen);
+
+    m_guidelineManager.proceed();
+
+    ImGui::End();
+
     if (m_stage == SelectionStage::SELECT_PATH)
     {
+        // Path selection window
+
         ImGui::Begin("Sprite order", &m_winOpen);
 
         ImGui::SeparatorText("Create new animation");
@@ -235,6 +251,8 @@ void AnimViewLevel::update()
     }
     else if (m_stage == SelectionStage::EDIT_ANIM)
     {
+        // Animation editing window
+
         if (m_runAnimation)
             currentFrame++;
 
@@ -357,6 +375,8 @@ void AnimViewLevel::update()
     }
     else if (m_stage == SelectionStage::REORDER_SPRITES)
     {
+        // Sprite ordering window
+        
         ImGui::Begin("Sprite order", &m_winOpen);
 
         if (ImGui::BeginTable("Sprite order tbl", 4,  ImGuiTableFlags_SizingStretchSame))

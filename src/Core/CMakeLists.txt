@@ -22,6 +22,7 @@ EngineAnimation.cpp
 DBAccessor.cpp
 DBManager.cpp
 UsedFilesManager.cpp
+GuidelinesManager.cpp
 )
 
 add_library (Core ${CORE_SRC_FILES})
