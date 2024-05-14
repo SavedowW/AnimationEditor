@@ -4,7 +4,8 @@
 DBManager::DBManager(std::shared_ptr<DBAccessor> db_) :
     m_db(db_),
     m_filemanager(db_),
-    m_guidelineManager(db_)
+    m_guidelineManager(db_),
+    m_colliderManager(db_)
 {
     auto *stmt = m_db->prepareStmt(
     "CREATE TABLE IF NOT EXISTS used_files (  "
@@ -27,6 +28,31 @@ DBManager::DBManager(std::shared_ptr<DBAccessor> db_) :
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
 
+    stmt = m_db->prepareStmt(
+    "CREATE TABLE IF NOT EXISTS collider_groups ( "
+    "group_id INTEGER PRIMARY KEY, "
+    "group_name TEXT, "
+    "file_id INTEGER, "
+    "FOREIGN KEY (file_id) REFERENCES  used_files (file_id) ) "
+    );
+
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    stmt = m_db->prepareStmt(
+    "CREATE TABLE IF NOT EXISTS colliders ( "
+    "collider_id INTEGER PRIMARY KEY, "
+    "x REAL, "
+    "y REAL, "
+    "w REAl, "
+    "h REAL, "
+    "group_id INTEGER, "
+    "FOREIGN KEY (group_id) REFERENCES  collider_groups (group_id) ) "
+    );
+
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
     m_guidelineManager.getGuidelines();
 }
 
@@ -42,6 +68,20 @@ void DBManager::pushFile(const std::string &filepath_, const std::string &filena
         m_filemanager.updateDate(id);
 }
 
+std::vector<collidergroupdata> DBManager::getColliders(const std::string &filepath_)
+{
+    auto path = filepath_;
+    std::replace(path.begin(), path.end(), '\\', '/');
+    
+    auto resvec = m_colliderManager.getRawGroups(filepath_);
+    for (auto &el : resvec)
+    {
+        m_colliderManager.getColliders(el);
+    }
+
+    return resvec;
+}
+
 UsedFilesManager &DBManager::getFileManager()
 {
     return m_filemanager;
@@ -50,4 +90,9 @@ UsedFilesManager &DBManager::getFileManager()
 GuidelinesManager *DBManager::getGuidelineManager()
 {
     return &m_guidelineManager;
+}
+
+ColliderManager &DBManager::getColliderManager()
+{
+    return m_colliderManager;
 }

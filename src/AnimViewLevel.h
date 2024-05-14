@@ -6,6 +6,7 @@
 #include "ImTimelinePropertyInt.h"
 #include "DBManager.h"
 #include "GuidelineViewer.h"
+#include "ColliderViewer.h"
 
 enum class SelectionStage {
     SELECT_PATH,
@@ -54,6 +55,7 @@ protected:
     std::vector<filedata> m_lastFiles;
 
     GuidelineViewer m_guidelineManager;
+    ColliderViewer m_colliderManager;
 };
 
 #endif

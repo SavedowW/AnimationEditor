@@ -75,7 +75,8 @@ AnimViewLevel::AnimViewLevel(Application *application_, const Vector2<float> &si
     Level(application_, size_, lvlId_),
     m_camera(gamedata::stages::startingCameraPos, {gamedata::global::cameraWidth, gamedata::global::cameraHeight}, m_size),
     m_db(std::shared_ptr<DBAccessor>(new DBAccessor("editor.db"))),
-    m_guidelineManager(m_size, m_db.getGuidelineManager())
+    m_guidelineManager(m_size, m_db.getGuidelineManager()),
+    m_colliderManager({size_.x / 2.0f, gamedata::stages::levelOfGround}, &m_db)
 {
     subscribe(EVENTS::RMB);
     subscribe(EVENTS::LMB);
@@ -117,9 +118,15 @@ void AnimViewLevel::receiveInput(EVENTS event, const float scale_)
     else if (event == EVENTS::LMB)
     {
         if (scale_ > 0)
+        {
             m_guidelineManager.attachLine();
+            m_colliderManager.attachPoint();
+        }
         else
+        {
             m_guidelineManager.detachLine();
+            m_colliderManager.detachPoint();
+        }
     }
 }
 
@@ -130,7 +137,9 @@ void AnimViewLevel::receiveMouseMovement(const Vector2<float> &offset_, const Ve
         m_camera.setPos(m_camera.getPos() - offset_);
     }
 
-    m_guidelineManager.updateMousePos(pos_ * m_camera.getScale() + m_camera.getTopLeft());
+    auto mwp = pos_ * m_camera.getScale() + m_camera.getTopLeft();
+    m_guidelineManager.updateMousePos(mwp);
+    m_colliderManager.updateMousePos(mwp);
 }
 
 void AnimViewLevel::setDirectory(const std::string &path_)
@@ -174,6 +183,7 @@ void AnimViewLevel::setAnimFile(const std::string &path_)
     filename.copy(m_filename, 1024);
 
     m_db.pushFile(path_, filename);
+    m_colliderManager.setFile(path_);
 }
 
 void AnimViewLevel::returnToStart()
@@ -183,6 +193,7 @@ void AnimViewLevel::returnToStart()
     m_anim = new EngineAnimation();
     m_stage = SelectionStage::SELECT_PATH;
     updateLastFilesList();
+    m_colliderManager.resetFile();
 }
 
 void AnimViewLevel::updateLastFilesList()
@@ -213,6 +224,8 @@ void AnimViewLevel::update()
     m_guidelineManager.proceed();
 
     ImGui::End();
+
+    m_colliderManager.proceed();
 
     if (m_stage == SelectionStage::SELECT_PATH)
     {
@@ -363,6 +376,7 @@ void AnimViewLevel::update()
             m_anim->saveAnimation(m_originalPath + "/" + m_filename, 5, 1.2);
             std::cout << "SAVED\n";
             m_db.pushFile(m_originalPath + "/" + m_filename, flnm);
+            m_colliderManager.setFile(m_originalPath + "/" + m_filename);
         }
 
         ImGui::SeparatorText("Misc");
@@ -446,6 +460,7 @@ void AnimViewLevel::draw()
     {gamedata::global::cameraWidth * gamedata::stages::maxCameraScale, gamedata::global::cameraHeight * gamedata::stages::maxCameraScale}, {255, 255, 0, 255}, m_camera);
 
     m_guidelineManager.draw(renderer, m_camera);
+    m_colliderManager.draw(renderer, m_camera);
 
     if (m_anim->m_frameCount > 0)
         renderer.renderTexture((*m_anim)[currentFrame], m_size.x / 2.0f - m_anim->m_origin.x, gamedata::stages::levelOfGround - m_anim->m_origin.y, m_anim->m_width, m_anim->m_height, m_camera, 0, SDL_FLIP_NONE);

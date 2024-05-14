@@ -23,6 +23,7 @@ DBAccessor.cpp
 DBManager.cpp
 UsedFilesManager.cpp
 GuidelinesManager.cpp
+ColliderManager.cpp
 )
 
 add_library (Core ${CORE_SRC_FILES})
