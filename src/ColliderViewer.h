@@ -30,11 +30,20 @@ private:
     Vector2<float> m_lvlSize;
     std::vector<collidergroupdata> m_colliderGroups;
 
-    const float m_maxRange = 30.0f;
+    colliderdata *m_closestCollider = nullptr;
+
+    /*
+    00  10
+    01  11
+    */
+    Vector2<int> m_attachedPoint;
+
+    const float m_maxRange = 100.0f;
 
     bool m_shown = false;
-    bool m_editing = false;
     bool m_attached = false;
+
+    std::string m_filepath;
 
 };
 

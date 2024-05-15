@@ -28,6 +28,10 @@ public:
     void getColliders(collidergroupdata &collidergroup_);
     std::vector<collidergroupdata> getRawGroups(const std::string &filepath_);
 
+    int createColliderGroup(const std::string &groupname_, const std::string &filepath_);
+    int createCollider(int cldgroup_, const colliderdata &cld_);
+    void updateCollider(const colliderdata &cld_);
+
 private:
     std::shared_ptr<DBAccessor> m_db;
 

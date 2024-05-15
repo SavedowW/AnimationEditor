@@ -11,6 +11,7 @@ public:
 
     void pushFile(const std::string &filepath_, const std::string &filename_);
     std::vector<collidergroupdata> getColliders(const std::string &filepath_);
+    int createColliderGroup(const std::string &groupname_, const std::string &filepath_);
     
     UsedFilesManager &getFileManager();
     GuidelinesManager *getGuidelineManager();

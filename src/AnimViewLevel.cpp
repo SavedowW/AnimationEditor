@@ -459,11 +459,11 @@ void AnimViewLevel::draw()
     renderer.drawRectangle({m_size.x / 2.0f - gamedata::global::cameraWidth * gamedata::stages::maxCameraScale / 2.0f, gamedata::stages::stageHeight - gamedata::global::cameraHeight * gamedata::stages::maxCameraScale - 1},
     {gamedata::global::cameraWidth * gamedata::stages::maxCameraScale, gamedata::global::cameraHeight * gamedata::stages::maxCameraScale}, {255, 255, 0, 255}, m_camera);
 
-    m_guidelineManager.draw(renderer, m_camera);
-    m_colliderManager.draw(renderer, m_camera);
-
     if (m_anim->m_frameCount > 0)
         renderer.renderTexture((*m_anim)[currentFrame], m_size.x / 2.0f - m_anim->m_origin.x, gamedata::stages::levelOfGround - m_anim->m_origin.y, m_anim->m_width, m_anim->m_height, m_camera, 0, SDL_FLIP_NONE);
+
+    m_guidelineManager.draw(renderer, m_camera);
+    m_colliderManager.draw(renderer, m_camera);
 
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
 

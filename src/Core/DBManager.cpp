@@ -82,6 +82,14 @@ std::vector<collidergroupdata> DBManager::getColliders(const std::string &filepa
     return resvec;
 }
 
+int DBManager::createColliderGroup(const std::string &groupname_, const std::string &filepath_)
+{
+    auto path = filepath_;
+    std::replace(path.begin(), path.end(), '\\', '/');
+
+    return m_colliderManager.createColliderGroup(groupname_, path);
+}
+
 UsedFilesManager &DBManager::getFileManager()
 {
     return m_filemanager;

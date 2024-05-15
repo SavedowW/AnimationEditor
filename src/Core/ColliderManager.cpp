@@ -56,3 +56,50 @@ std::vector<collidergroupdata> ColliderManager::getRawGroups(const std::string &
 
     return resvec;
 }
+
+int ColliderManager::createColliderGroup(const std::string &groupname_, const std::string &filepath_)
+{
+    auto *stmt = m_db->prepareStmt("INSERT INTO collider_groups(group_name, file_id) VALUES (?, (SELECT file_id FROM used_files WHERE file_path=?))");
+    sqlite3_bind_text(stmt, 1, groupname_.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, filepath_.c_str(), -1, SQLITE_STATIC);
+
+    sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+
+    auto res = m_db->getLastInsertedID();
+    std::cout << res << std::endl;
+    return res;
+}
+
+int ColliderManager::createCollider(int cldgroup_, const colliderdata &cld_)
+{
+    auto *stmt = m_db->prepareStmt("INSERT INTO colliders(x, y, w, h, group_id) VALUES (?, ?, ?, ?, ?)");
+    sqlite3_bind_double(stmt, 1, cld_.m_pos.x);
+    sqlite3_bind_double(stmt, 2, cld_.m_pos.y);
+    sqlite3_bind_double(stmt, 3, cld_.m_size.x);
+    sqlite3_bind_double(stmt, 4, cld_.m_pos.y);
+    sqlite3_bind_int(stmt, 5, cldgroup_);
+
+    sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+
+    auto res = m_db->getLastInsertedID();
+    std::cout << res << std::endl;
+    return res;
+}
+
+void ColliderManager::updateCollider(const colliderdata &cld_)
+{
+    auto *stmt = m_db->prepareStmt("UPDATE colliders SET x = ?, y = ?, w = ?, h = ? WHERE collider_id = ?");
+    sqlite3_bind_double(stmt, 1, cld_.m_pos.x);
+    sqlite3_bind_double(stmt, 2, cld_.m_pos.y);
+    sqlite3_bind_double(stmt, 3, cld_.m_size.x);
+    sqlite3_bind_double(stmt, 4, cld_.m_size.y);
+    sqlite3_bind_double(stmt, 5, cld_.m_id);
+
+    sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+}
