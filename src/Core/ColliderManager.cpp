@@ -123,3 +123,23 @@ void ColliderManager::updateCollider(const colliderdata &cld_)
 
     sqlite3_finalize(stmt);
 }
+
+void ColliderManager::deleteCollider(int cldid_)
+{
+    auto *stmt = m_db->prepareStmt("DELETE FROM colliders WHERE collider_id = ?");
+    sqlite3_bind_int(stmt, 1, cldid_);
+
+    sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+}
+
+void ColliderManager::deleteColliderGroup(int cgid_)
+{
+    auto *stmt = m_db->prepareStmt("DELETE FROM collider_groups WHERE group_id = ?");
+    sqlite3_bind_int(stmt, 1, cgid_);
+
+    sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+}

@@ -455,11 +455,6 @@ void AnimViewLevel::draw()
     auto &renderer = *m_application->getRenderer();
     renderer.fillRenderer(SDL_Color{ 25, 25, 25, 255 });
 
-    /*renderer.drawLine({0, gamedata::stages::levelOfGround}, {m_size.x, gamedata::stages::levelOfGround}, {0, 0, 200, 255}, m_camera);
-    renderer.drawLine({m_size.x / 2.0f, 0.0f}, {m_size.x / 2.0f, m_size.y}, {0, 0, 200, 255}, m_camera);
-    renderer.drawLine({0, gamedata::stages::levelOfGround - 350}, {m_size.x, gamedata::stages::levelOfGround - 350}, {0, 0, 200, 255}, m_camera);
-    renderer.drawLine({0, gamedata::stages::levelOfGround - 175}, {m_size.x, gamedata::stages::levelOfGround - 175}, {0, 0, 200, 255}, m_camera);*/
-
     renderer.drawRectangle({m_size.x / 2.0f - gamedata::global::cameraWidth * gamedata::stages::minCameraScale / 2.0f, gamedata::stages::stageHeight - gamedata::global::cameraHeight * gamedata::stages::minCameraScale - 1},
     {gamedata::global::cameraWidth * gamedata::stages::minCameraScale, gamedata::global::cameraHeight * gamedata::stages::minCameraScale}, {255, 255, 0, 255}, m_camera);
     

@@ -69,10 +69,23 @@ void ColliderViewer::proceed()
             cld.m_dirtyflag = false;
             m_colliderGroups[gpi].m_colliders.push_back(cld);
         }
+        ImGui::SameLine();
+        if (ImGui::Button(("Delete##cg_" + std::to_string(gpi)).c_str()))
+        {
+            m_db->getColliderManager().deleteColliderGroup(gp.m_id);
+            m_colliderGroups.erase(m_colliderGroups.begin() + gpi);
+        }
 
         for (int cldi = 0; cldi < gp.m_colliders.size(); ++cldi)
         {
             auto &cld = gp.m_colliders[cldi];
+
+            if (ImGui::Button(("Delete##_" + std::to_string(gpi) + "_" + std::to_string(cldi)).c_str()))
+            {
+                m_db->getColliderManager().deleteCollider(cld.m_id);
+                gp.m_colliders.erase(gp.m_colliders.begin() + cldi);
+            }
+
             ImGui::PushItemWidth(64);
             if (ImGui::DragFloat((std::string("x##_") + std::to_string(gpi) + "_" + std::to_string(cldi)).c_str(), &cld.m_pos.x))
                 cld.m_dirtyflag = true;

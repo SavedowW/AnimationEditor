@@ -36,6 +36,9 @@ public:
     void updateColliderGroup(const collidergroupdata &cg_);
     void updateCollider(const colliderdata &cld_);
 
+    void deleteCollider(int cldid_);
+    void deleteColliderGroup(int cgid_);
+
 private:
     std::shared_ptr<DBAccessor> m_db;
 

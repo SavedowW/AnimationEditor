@@ -58,6 +58,28 @@ DBManager::DBManager(std::shared_ptr<DBAccessor> db_) :
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
 
+    stmt = m_db->prepareStmt(
+    "CREATE TRIGGER IF NOT EXISTS auto_delete_collider "
+    "BEFORE DELETE ON collider_groups "
+    "BEGIN "
+    "DELETE FROM colliders WHERE colliders.group_id = old.group_id; "
+    "END "
+    );
+
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    stmt = m_db->prepareStmt(
+    "CREATE TRIGGER IF NOT EXISTS auto_delete_collider_group "
+    "BEFORE DELETE ON used_files "
+    "BEGIN "
+    "DELETE FROM collider_groups WHERE collider_groups.file_id = old.file_id; "
+    "END "
+    );
+
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
     m_guidelineManager.getGuidelines();
 }
 
