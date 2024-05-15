@@ -35,7 +35,7 @@ std::vector<collidergroupdata> ColliderManager::getRawGroups(const std::string &
 {
     std::vector<collidergroupdata> resvec;
 
-    auto *stmt = m_db->prepareStmt("SELECT group_id, group_name	FROM collider_groups LEFT JOIN used_files on collider_groups.file_id = used_files.file_id WHERE file_path=?");
+    auto *stmt = m_db->prepareStmt("SELECT group_id, group_name, color_r, color_g, color_b FROM collider_groups LEFT JOIN used_files on collider_groups.file_id = used_files.file_id WHERE file_path=?");
     sqlite3_bind_text(stmt, 1, filepath_.c_str(), -1, SQLITE_STATIC);
 
     int res = SQLITE_ROW;
@@ -47,6 +47,9 @@ std::vector<collidergroupdata> ColliderManager::getRawGroups(const std::string &
             collidergroupdata cg;
             cg.m_id = sqlite3_column_int(stmt, 0);
             cg.m_name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+            cg.m_color[0] = sqlite3_column_double(stmt, 2);
+            cg.m_color[1] = sqlite3_column_double(stmt, 3);
+            cg.m_color[2] = sqlite3_column_double(stmt, 4);
             cg.m_dirtyflag = false;
             resvec.push_back(cg);
         }
@@ -59,7 +62,7 @@ std::vector<collidergroupdata> ColliderManager::getRawGroups(const std::string &
 
 int ColliderManager::createColliderGroup(const std::string &groupname_, const std::string &filepath_)
 {
-    auto *stmt = m_db->prepareStmt("INSERT INTO collider_groups(group_name, file_id) VALUES (?, (SELECT file_id FROM used_files WHERE file_path=?))");
+    auto *stmt = m_db->prepareStmt("INSERT INTO collider_groups(group_name, file_id, color_r, color_g, color_b ) VALUES (?, (SELECT file_id FROM used_files WHERE file_path=?), 1, 1, 1)");
     sqlite3_bind_text(stmt, 1, groupname_.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, filepath_.c_str(), -1, SQLITE_STATIC);
 
@@ -88,6 +91,18 @@ int ColliderManager::createCollider(int cldgroup_, const colliderdata &cld_)
     auto res = m_db->getLastInsertedID();
     std::cout << res << std::endl;
     return res;
+}
+
+void ColliderManager::updateColliderGroup(const collidergroupdata &cg_)
+{
+    auto *stmt = m_db->prepareStmt("UPDATE collider_groups SET color_r = ?, color_g = ?, color_b = ?");
+    sqlite3_bind_double(stmt, 1, cg_.m_color[0]);
+    sqlite3_bind_double(stmt, 2, cg_.m_color[1]);
+    sqlite3_bind_double(stmt, 3, cg_.m_color[2]);
+
+    sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
 }
 
 void ColliderManager::updateCollider(const colliderdata &cld_)

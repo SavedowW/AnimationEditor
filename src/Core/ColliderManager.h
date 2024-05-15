@@ -18,6 +18,7 @@ struct collidergroupdata
     int m_id;
     std::string m_name;
     std::vector<colliderdata> m_colliders;
+    float m_color[3] = {1.0f, 1.0f, 1.0f};
     bool m_dirtyflag = false;
 };
 
@@ -30,6 +31,7 @@ public:
 
     int createColliderGroup(const std::string &groupname_, const std::string &filepath_);
     int createCollider(int cldgroup_, const colliderdata &cld_);
+    void updateColliderGroup(const collidergroupdata &cg_);
     void updateCollider(const colliderdata &cld_);
 
 private:

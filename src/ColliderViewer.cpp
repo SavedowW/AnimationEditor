@@ -47,6 +47,11 @@ void ColliderViewer::proceed()
         auto &gp = m_colliderGroups[gpi];
         ImGui::SeparatorText(gp.m_name.c_str());
 
+        if (ImGui::ColorEdit3(("Color##cld_" + std::to_string(gpi)).c_str(), gp.m_color))
+        {
+            gp.m_dirtyflag = true;
+        }
+
         if (ImGui::Button(("+##cld_" + std::to_string(gpi)).c_str(), {18, 18}))
         {
             colliderdata cld;
@@ -84,6 +89,12 @@ void ColliderViewer::proceed()
                     m_db->getColliderManager().updateCollider(cld);
                     cld.m_dirtyflag = false;
                 }
+            }
+
+            if (grp.m_dirtyflag)
+            {
+                m_db->getColliderManager().updateColliderGroup(grp);
+                grp.m_dirtyflag = false;
             }
         }
     }
@@ -170,6 +181,8 @@ void ColliderViewer::detachPoint()
             m_closestCollider->m_pos.y += m_closestCollider->m_size.y;
             m_closestCollider->m_size.y = abs(m_closestCollider->m_size.y);
         }
+
+        m_closestCollider->m_dirtyflag = true;
     }
 
     m_closestCollider = nullptr;
@@ -184,12 +197,12 @@ void ColliderViewer::draw(Renderer &renderer_, Camera &cam_)
     {
         for (auto &cld : gp.m_colliders)
         {
-            renderer_.fillRectangle({cld.m_pos.x + m_animPos.x, cld.m_pos.y + m_animPos.y}, {cld.m_size.x, cld.m_size.y}, {255, 100, 100, 100}, cam_);
-            renderer_.drawRectangle({cld.m_pos.x + m_animPos.x, cld.m_pos.y + m_animPos.y}, {cld.m_size.x, cld.m_size.y}, {255, 100, 100, 100}, cam_);
+            renderer_.fillRectangle({cld.m_pos.x + m_animPos.x, cld.m_pos.y + m_animPos.y}, {cld.m_size.x, cld.m_size.y}, {Uint8(255 * gp.m_color[0]), Uint8(255 * gp.m_color[1]), Uint8(255 * gp.m_color[2]), 100}, cam_);
+            renderer_.drawRectangle({cld.m_pos.x + m_animPos.x, cld.m_pos.y + m_animPos.y}, {cld.m_size.x, cld.m_size.y}, {Uint8(255 * gp.m_color[0]), Uint8(255 * gp.m_color[1]), Uint8(255 * gp.m_color[2]), 100}, cam_);
             if (&cld == m_closestCollider)
             {
                 auto attachedPointWorld = m_animPos + m_closestCollider->m_pos + m_closestCollider->m_size.mulComponents(m_attachedPoint);
-                renderer_.fillRectangle(attachedPointWorld - Vector2{5.0f, 5.0f}, {10.0f, 10.0f}, {255, 100, 100, 100}, cam_);
+                renderer_.fillRectangle(attachedPointWorld - Vector2{5.0f, 5.0f}, {10.0f, 10.0f}, {Uint8(255 * gp.m_color[0]), Uint8(255 * gp.m_color[1]), Uint8(255 * gp.m_color[2]), 100}, cam_);
             }
         }
     }

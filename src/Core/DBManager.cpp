@@ -32,6 +32,9 @@ DBManager::DBManager(std::shared_ptr<DBAccessor> db_) :
     "CREATE TABLE IF NOT EXISTS collider_groups ( "
     "group_id INTEGER PRIMARY KEY, "
     "group_name TEXT, "
+    "color_r REAL, "
+    "color_g REAL, "
+    "color_b REAL, "
     "file_id INTEGER, "
     "FOREIGN KEY (file_id) REFERENCES  used_files (file_id) ) "
     );
