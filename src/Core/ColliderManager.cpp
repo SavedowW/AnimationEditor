@@ -7,7 +7,7 @@ ColliderManager::ColliderManager(std::shared_ptr<DBAccessor> db_) :
 
 void ColliderManager::getColliders(collidergroupdata &collidergroup_)
 {
-    auto *stmt = m_db->prepareStmt("SELECT collider_id, x, y, w, h FROM colliders where group_id = ?");
+    auto *stmt = m_db->prepareStmt("SELECT collider_id, x, y, w, h, first_frame, last_frame FROM colliders where group_id = ?");
     sqlite3_bind_int(stmt, 1, collidergroup_.m_id);
 
     int res = SQLITE_ROW;
@@ -22,6 +22,8 @@ void ColliderManager::getColliders(collidergroupdata &collidergroup_)
             cld.m_pos.y = sqlite3_column_double(stmt, 2);
             cld.m_size.x = sqlite3_column_double(stmt, 3);
             cld.m_size.y = sqlite3_column_double(stmt, 4);
+            cld.m_firstFrame = sqlite3_column_int(stmt, 5);
+            cld.m_lastFrame = sqlite3_column_int(stmt, 6);
             cld.m_dirtyflag = false;
             collidergroup_.m_colliders.push_back(cld);
         }
@@ -77,7 +79,7 @@ int ColliderManager::createColliderGroup(const std::string &groupname_, const st
 
 int ColliderManager::createCollider(int cldgroup_, const colliderdata &cld_)
 {
-    auto *stmt = m_db->prepareStmt("INSERT INTO colliders(x, y, w, h, group_id) VALUES (?, ?, ?, ?, ?)");
+    auto *stmt = m_db->prepareStmt("INSERT INTO colliders(x, y, w, h, group_id, first_frame, last_frame) VALUES (?, ?, ?, ?, ?, 0, 0)");
     sqlite3_bind_double(stmt, 1, cld_.m_pos.x);
     sqlite3_bind_double(stmt, 2, cld_.m_pos.y);
     sqlite3_bind_double(stmt, 3, cld_.m_size.x);
@@ -95,10 +97,11 @@ int ColliderManager::createCollider(int cldgroup_, const colliderdata &cld_)
 
 void ColliderManager::updateColliderGroup(const collidergroupdata &cg_)
 {
-    auto *stmt = m_db->prepareStmt("UPDATE collider_groups SET color_r = ?, color_g = ?, color_b = ?");
+    auto *stmt = m_db->prepareStmt("UPDATE collider_groups SET color_r = ?, color_g = ?, color_b = ? WHERE group_id = ?");
     sqlite3_bind_double(stmt, 1, cg_.m_color[0]);
     sqlite3_bind_double(stmt, 2, cg_.m_color[1]);
     sqlite3_bind_double(stmt, 3, cg_.m_color[2]);
+    sqlite3_bind_int(stmt, 4, cg_.m_id);
 
     sqlite3_step(stmt);
 
@@ -107,14 +110,16 @@ void ColliderManager::updateColliderGroup(const collidergroupdata &cg_)
 
 void ColliderManager::updateCollider(const colliderdata &cld_)
 {
-    auto *stmt = m_db->prepareStmt("UPDATE colliders SET x = ?, y = ?, w = ?, h = ? WHERE collider_id = ?");
+    auto *stmt = m_db->prepareStmt("UPDATE colliders SET x = ?, y = ?, w = ?, h = ?, first_frame = ?, last_frame = ? WHERE collider_id = ?");
     sqlite3_bind_double(stmt, 1, cld_.m_pos.x);
     sqlite3_bind_double(stmt, 2, cld_.m_pos.y);
     sqlite3_bind_double(stmt, 3, cld_.m_size.x);
     sqlite3_bind_double(stmt, 4, cld_.m_size.y);
-    sqlite3_bind_double(stmt, 5, cld_.m_id);
+    sqlite3_bind_int(stmt, 5, cld_.m_firstFrame);
+    sqlite3_bind_int(stmt, 6, cld_.m_lastFrame);
+    sqlite3_bind_double(stmt, 7, cld_.m_id);
 
-    sqlite3_step(stmt);
+    auto res = sqlite3_step(stmt);
 
     sqlite3_finalize(stmt);
 }

@@ -11,6 +11,8 @@ struct colliderdata
     Vector2<float> m_pos;
     Vector2<float> m_size;
     bool m_dirtyflag = false;
+    int m_firstFrame = 0;
+    int m_lastFrame = 0;
 };
 
 struct collidergroupdata

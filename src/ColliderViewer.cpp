@@ -19,6 +19,16 @@ ColliderViewer::ColliderViewer(Vector2<float> animPos_, DBManager *dbManager_) :
 {
 }
 
+void ColliderViewer::setCurrentFrame(int currentFrame_)
+{
+    m_currentFrame = currentFrame_;
+}
+
+void ColliderViewer::setDuration(int duration_)
+{
+    m_duration = duration_;
+}
+
 void ColliderViewer::proceed()
 {
     if (!m_shown)
@@ -75,6 +85,13 @@ void ColliderViewer::proceed()
             ImGui::SameLine();
             if (ImGui::DragFloat((std::string("h##_") + std::to_string(gpi) + "_" + std::to_string(cldi)).c_str(), &cld.m_size.y))
                 cld.m_dirtyflag = true;
+
+            ImGui::PushItemWidth(200);
+            if (ImGui::SliderInt((std::string("Begin##_") + std::to_string(gpi) + "_" + std::to_string(cldi)).c_str(), &cld.m_firstFrame, 0, cld.m_lastFrame))
+                cld.m_dirtyflag = true;
+            ImGui::PushItemWidth(200);
+            if (ImGui::SliderInt((std::string("End##_") + std::to_string(gpi) + "_" + std::to_string(cldi)).c_str(), &cld.m_lastFrame, cld.m_firstFrame, m_duration - 1))
+                cld.m_dirtyflag = true;
         }
     }
 
@@ -116,6 +133,9 @@ void ColliderViewer::updateMousePos(const Vector2<float> mouseWorldPos_)
         {
             for (auto &cld : cg.m_colliders)
             {
+                if (cld.m_firstFrame > m_currentFrame || cld.m_lastFrame < m_currentFrame)
+                    continue;
+
                 for (const auto &ptid : ptids)
                 {
                     auto point = m_animPos + cld.m_pos + cld.m_size.mulComponents(ptid);
@@ -153,12 +173,17 @@ void ColliderViewer::updateMousePos(const Vector2<float> mouseWorldPos_)
     }
 }
 
-void ColliderViewer::attachPoint()
+bool ColliderViewer::attachPoint()
 {
     if (!m_shown)
-        return;
+        return false;
+
+    if (m_closestCollider && (m_closestCollider->m_firstFrame > m_currentFrame || m_closestCollider->m_lastFrame < m_currentFrame))
+        return false;
 
     m_attached = true;
+
+    return m_closestCollider;
 }
 
 void ColliderViewer::detachPoint()
@@ -197,6 +222,9 @@ void ColliderViewer::draw(Renderer &renderer_, Camera &cam_)
     {
         for (auto &cld : gp.m_colliders)
         {
+            if (cld.m_firstFrame > m_currentFrame || cld.m_lastFrame < m_currentFrame)
+                    continue;
+
             renderer_.fillRectangle({cld.m_pos.x + m_animPos.x, cld.m_pos.y + m_animPos.y}, {cld.m_size.x, cld.m_size.y}, {Uint8(255 * gp.m_color[0]), Uint8(255 * gp.m_color[1]), Uint8(255 * gp.m_color[2]), 100}, cam_);
             renderer_.drawRectangle({cld.m_pos.x + m_animPos.x, cld.m_pos.y + m_animPos.y}, {cld.m_size.x, cld.m_size.y}, {Uint8(255 * gp.m_color[0]), Uint8(255 * gp.m_color[1]), Uint8(255 * gp.m_color[2]), 100}, cam_);
             if (&cld == m_closestCollider)

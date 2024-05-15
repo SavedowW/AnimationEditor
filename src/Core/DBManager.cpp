@@ -49,6 +49,8 @@ DBManager::DBManager(std::shared_ptr<DBAccessor> db_) :
     "y REAL, "
     "w REAl, "
     "h REAL, "
+    "first_frame int, "
+    "last_frame int, "
     "group_id INTEGER, "
     "FOREIGN KEY (group_id) REFERENCES  collider_groups (group_id) ) "
     );

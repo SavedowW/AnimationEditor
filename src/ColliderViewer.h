@@ -12,10 +12,13 @@ class ColliderViewer {
 public:
     ColliderViewer(Vector2<float> animPos_, DBManager *dbManager_);
 
+    void setCurrentFrame(int currentFrame_);
+    void setDuration(int duration_);
+
     void proceed();
 
     void updateMousePos(const Vector2<float> mouseWorldPos_);
-    void attachPoint();
+    bool attachPoint();
     void detachPoint();
 
     void draw(Renderer &renderer_, Camera &cam_);
@@ -44,6 +47,9 @@ private:
     bool m_attached = false;
 
     std::string m_filepath;
+
+    int m_currentFrame = 1;
+    int m_duration = 1;
 
 };
 

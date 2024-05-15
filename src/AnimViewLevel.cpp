@@ -120,7 +120,8 @@ void AnimViewLevel::receiveInput(EVENTS event, const float scale_)
         if (scale_ > 0)
         {
             m_guidelineManager.attachLine();
-            m_colliderManager.attachPoint();
+            bool continueAnim = !m_colliderManager.attachPoint();
+            m_runAnimation = continueAnim && m_runAnimation;
         }
         else
         {
@@ -184,6 +185,8 @@ void AnimViewLevel::setAnimFile(const std::string &path_)
 
     m_db.pushFile(path_, filename);
     m_colliderManager.setFile(path_);
+    m_colliderManager.setCurrentFrame(0);
+    m_colliderManager.setDuration(m_anim->m_duration);
 }
 
 void AnimViewLevel::returnToStart()
@@ -280,6 +283,8 @@ void AnimViewLevel::update()
             }
         }
 
+        m_colliderManager.setCurrentFrame(currentFrame);
+
         ImGui::Begin("Editor", &m_winOpen);
 
         ImGui::SeparatorText("Animation data");
@@ -314,6 +319,8 @@ void AnimViewLevel::update()
         {
             if (m_anim->m_duration < 1)
                 m_anim->m_duration = 1;
+
+            m_colliderManager.setDuration(m_anim->m_duration);
         }
 
         ImGui::SeparatorText("Size");
