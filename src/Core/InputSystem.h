@@ -1,7 +1,7 @@
 #ifndef INPUT_H_
 #define INPUT_H_
 #include <SDL.h>
-#include <SDL_Image.h>
+#include <SDL_image.h>
 #include <map>
 #include <vector>
 #include <functional>

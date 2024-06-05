@@ -28,7 +28,7 @@ ColliderManager.cpp
 
 add_library (Core ${CORE_SRC_FILES})
 
-set_property(TARGET Core PROPERTY CXX_STANDARD 23)
+set_property(TARGET Core PROPERTY CXX_STANDARD 20)
 
 include_directories(${INCLUDE_DIRS})
 target_link_libraries(Core ${LINK_LIBRARIES})

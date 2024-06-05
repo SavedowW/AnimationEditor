@@ -148,8 +148,8 @@ bool TimelineProperty<T>::isEmpty() const
     return m_isEmpty;
 }
 
-template TimelineProperty<bool>;
-template TimelineProperty<float>;
-template TimelineProperty<int>;
-template TimelineProperty<Vector2<float>>;
-template TimelineProperty<Vector2<int>>;
+template class TimelineProperty<bool>;
+template class TimelineProperty<float>;
+template class TimelineProperty<int>;
+template class TimelineProperty<Vector2<float>>;
+template class TimelineProperty<Vector2<int>>;

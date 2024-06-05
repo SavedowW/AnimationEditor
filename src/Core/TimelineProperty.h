@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <ranges>
 #include <utility>
+#include <cstdint>
 
 template<typename T>
 class TimelineProperty {

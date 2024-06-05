@@ -31,4 +31,4 @@ void ResourceCounter<Resource_t>::free()
     m_consumed = 0;
 }
 
-template ResourceCounter<int>;
+template class ResourceCounter<int>;

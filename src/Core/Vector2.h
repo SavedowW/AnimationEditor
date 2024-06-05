@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include "Utils.h"
+#include <vector>
 
 enum class ORIENTATION {RIGHT, LEFT};
 

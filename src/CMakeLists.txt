@@ -6,7 +6,6 @@ project(${PROJECT_NAME})
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_IMAGE REQUIRED)
-find_package(lz4 REQUIRED)
 find_package(SQLite3 REQUIRED)
 
 set(SRC_FILES 
@@ -38,17 +37,25 @@ set(LINK_LIBRARIES
 ${sdl_LIBRARIES_DEBUG}
 SDL2::SDL2
 SDL2_image::SDL2_image
-LZ4::lz4_static
 ${SQLite3_LIBRARIES}
 )
 
-message(${LINK_LIBRARIES})
+if (WIN32)
+    find_package(lz4 REQUIRED)
+    list(APPEND LINK_LIBRARIES LZ4::lz4_static)
+elseif (UNIX)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(lz4 REQUIRED IMPORTED_TARGET liblz4)
+    list(APPEND LINK_LIBRARIES PkgConfig::lz4)
+endif ()
+
+#message(${LINK_LIBRARIES})
 
 add_executable (${PROJECT_NAME} ${SRC_FILES})
 
 add_subdirectory(Core)
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 23)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 
 include_directories(${INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBRARIES} Core)

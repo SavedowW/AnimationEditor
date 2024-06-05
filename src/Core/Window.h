@@ -2,7 +2,7 @@
 #define WINDOW_H_
 
 #include <SDL.h>
-#include <SDL_Image.h>
+#include <SDL_image.h>
 #include <string>
 #include "Vector2.h"
 

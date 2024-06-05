@@ -2,6 +2,7 @@
 #define UTILS_H_
 #include <filesystem>
 #include <string>
+#include <algorithm>
 
 namespace utils
 {
