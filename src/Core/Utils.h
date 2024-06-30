@@ -6,6 +6,35 @@
 
 namespace utils
 {
+    template<typename T>
+    class Average
+    {
+    public:
+        Average(const T &def_ = 0) :
+            sum(def_)
+        {
+        }
+
+        template<typename T2>
+        Average &operator+=(const T2 &rhs_)
+        {
+            sum += rhs_;
+            cnt++;
+            return *this;
+        }
+
+        template<typename T2>
+        operator T2()
+        {
+            return sum / cnt;
+        }
+
+    private:
+        T sum;
+        int cnt = 0;
+
+    };
+
     template <typename T>
     inline T clamp(const T& val, const T &min, const T &max)
     {

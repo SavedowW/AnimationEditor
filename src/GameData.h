@@ -23,7 +23,7 @@ namespace gamedata
             Vector2{stageWidth / 2.0f - charSpawnRange, levelOfGround},
             Vector2{stageWidth / 2.0f + charSpawnRange, levelOfGround}
         }};
-        inline constexpr float minCameraScale = 0.73f;
+        inline constexpr float minCameraScale = 0.18f;
         inline constexpr float maxCameraScale = 1.0f;
         inline constexpr float heightMovePriority = 0.6f;
         inline constexpr float reservedScaleRange = 200.0f;

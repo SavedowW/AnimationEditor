@@ -6,13 +6,14 @@
 #include "lz4.h"
 #include "lz4frame.h"
 #include "lz4hc.h"
+#include <array>
 
 class EngineAnimation
 {
 public:
     EngineAnimation();
 
-    void saveAnimation(const std::string &path_, int blurRange_, float blurScaler_);
+    void saveAnimation(const std::string &path_, int blurRange_, Renderer &ren_);
 
     void loadAnimation(const std::string &path_, Renderer &ren_);
 
@@ -22,16 +23,29 @@ public:
     void setDuration(uint32_t duration_);
     void scaleToHeight(int height_);
 
-    SDL_Texture *operator[](uint32_t frame_);
+    // Using () because current intellisense does not support operator[] with multiple arguments
+    SDL_Texture *operator()(size_t layer_, uint32_t frame_);
+
+    void generateLayer(size_t layer_, int blurRange_, Renderer &ren_);
 
     void clear();
 
     ~EngineAnimation();
 
 //private:
-    std::vector<SDL_Surface *> m_surfaces;
-    std::vector<SDL_Surface *> m_whiteSurfaces;
-    std::vector<SDL_Texture *> m_textures;
+    struct Layer
+    {
+        std::vector<SDL_Surface *> m_surfaces;
+        std::vector<SDL_Texture *> m_textures;
+        bool m_isGenerated = false;
+        std::string m_layerName;
+
+        void addSurface(SDL_Surface *sur_, Renderer &ren_);
+        void clear();
+    };
+
+    std::array<Layer, 2> m_layers;
+
     int m_width = 1;
     int m_height = 1;
     int m_realWidth = 1;
@@ -46,11 +60,14 @@ public:
     void saveSurfaceLZ4(SDL_Surface *sur_, Uint32 uncompressed_size_, int max_lz4_size_);
     SDL_Surface *loadSurfaceLZ4();
 
-
     char *m_compressionBuffer = nullptr;
 
     // Create pure white version of surface
-    SDL_Surface *toPureWhite(SDL_Surface *sur_, int blurRange_, float blurScaler_);
+    SDL_Surface *toPureWhite(SDL_Surface *sur_, int blurRange_);
+
+    void saveAnimationV1(int blurRange_, Renderer &ren_);
+
+    void loadAnimationV1(Renderer &ren_);
 };
 
 #endif

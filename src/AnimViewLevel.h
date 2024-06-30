@@ -7,6 +7,7 @@
 #include "DBManager.h"
 #include "GuidelineViewer.h"
 #include "ColliderViewer.h"
+#include "LayerViewer.h"
 
 enum class SelectionStage {
     SELECT_PATH,
@@ -56,6 +57,7 @@ protected:
 
     GuidelineViewer m_guidelineManager;
     ColliderViewer m_colliderManager;
+    LayerViewer m_layerViewer;
 };
 
 #endif
