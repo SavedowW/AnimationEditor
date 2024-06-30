@@ -115,7 +115,7 @@ void AnimViewLevel::receiveInput(EVENTS event, const float scale_)
     }
     else if (event == EVENTS::WHEEL_SCROLL)
     {
-        m_camera.setScale(utils::clamp(m_camera.getScale() + scale_ * -0.1f, gamedata::stages::minCameraScale, gamedata::stages::maxCameraScale));
+        m_camera.setScale(utils::clamp(m_camera.getScale() + scale_ * -0.020f, gamedata::stages::minCameraScale, gamedata::stages::maxCameraScale));
     }
     else if (event == EVENTS::LMB)
     {
@@ -175,20 +175,23 @@ void AnimViewLevel::setAnimFile(const std::string &path_)
     std::filesystem::path dirpath(path_);
     m_originalPath = dirpath.parent_path().string();
 
-    m_anim->loadAnimation(path_, *renderer);
+    auto res = m_anim->loadAnimation(path_, *renderer);
 
-    m_stage = SelectionStage::EDIT_ANIM;
+    if (res)
+    {
+        m_stage = SelectionStage::EDIT_ANIM;
 
-    m_animFrames.setProps(&m_anim->m_framesData);
-    m_animFrames.setLimits(0, m_anim->m_frameCount - 1);
+        m_animFrames.setProps(&m_anim->m_framesData);
+        m_animFrames.setLimits(0, m_anim->m_frameCount - 1);
 
-    auto filename = dirpath.filename().string();
-    filename.copy(m_filename, 1024);
+        auto filename = dirpath.filename().string();
+        filename.copy(m_filename, 1024);
 
-    m_db.pushFile(path_, filename);
-    m_colliderManager.setFile(path_);
-    m_colliderManager.setCurrentFrame(0);
-    m_colliderManager.setDuration(m_anim->m_duration);
+        m_db.pushFile(path_, filename);
+        m_colliderManager.setFile(path_);
+        m_colliderManager.setCurrentFrame(0);
+        m_colliderManager.setDuration(m_anim->m_duration);
+    }
 }
 
 void AnimViewLevel::returnToStart()
@@ -231,8 +234,8 @@ void AnimViewLevel::update()
     ImGui::End();
 
     // Layer window
-    ImGui::SetNextWindowPos(ImVec2(1290, 220));
-    ImGui::SetNextWindowSize(ImVec2(300, 200));
+    ImGui::SetNextWindowPos(ImVec2(1250, 220));
+    ImGui::SetNextWindowSize(ImVec2(340, 200));
 
     ImGui::Begin("Layer viewer", &m_winOpen);
 
@@ -388,15 +391,23 @@ void AnimViewLevel::update()
 
         ImGui::PushItemWidth(300);
         ImGui::SeparatorText("Output");
+        static int exportVersion = 2;
+        if (ImGui::InputInt("Format version", &exportVersion))
+        {
+            exportVersion = utils::clamp(exportVersion, 1, 2);
+        }
         ImGui::InputText("File name", m_filename, 1024);
         if (ImGui::Button("Export"))
         {
             std::string flnm(m_filename);
             std::cout << flnm << std::endl;
-            m_anim->saveAnimation(m_originalPath + "/" + m_filename, 5, *m_application->getRenderer());
-            std::cout << "SAVED\n";
-            m_db.pushFile(m_originalPath + "/" + m_filename, flnm);
-            m_colliderManager.setFile(m_originalPath + "/" + m_filename);
+            auto res = m_anim->saveAnimation(m_originalPath + "/" + m_filename, 5, *m_application->getRenderer(), exportVersion);
+            if (res)
+            {
+                std::cout << "SAVED\n";
+                m_db.pushFile(m_originalPath + "/" + m_filename, flnm);
+                m_colliderManager.setFile(m_originalPath + "/" + m_filename);
+            }
         }
 
         ImGui::SeparatorText("Misc");
@@ -467,12 +478,6 @@ void AnimViewLevel::draw()
 
     auto &renderer = *m_application->getRenderer();
     renderer.fillRenderer(SDL_Color{ 25, 25, 25, 255 });
-
-    renderer.drawRectangle({m_size.x / 2.0f - gamedata::global::cameraWidth * gamedata::stages::minCameraScale / 2.0f, gamedata::stages::stageHeight - gamedata::global::cameraHeight * gamedata::stages::minCameraScale - 1},
-    {gamedata::global::cameraWidth * gamedata::stages::minCameraScale, gamedata::global::cameraHeight * gamedata::stages::minCameraScale}, {255, 255, 0, 255}, m_camera);
-    
-    renderer.drawRectangle({m_size.x / 2.0f - gamedata::global::cameraWidth * gamedata::stages::maxCameraScale / 2.0f, gamedata::stages::stageHeight - gamedata::global::cameraHeight * gamedata::stages::maxCameraScale - 1},
-    {gamedata::global::cameraWidth * gamedata::stages::maxCameraScale, gamedata::global::cameraHeight * gamedata::stages::maxCameraScale}, {255, 255, 0, 255}, m_camera);
 
     //if (m_anim->m_frameCount > 0)
     //    renderer.renderTexture((*m_anim)(0, currentFrame), m_size.x / 2.0f - m_anim->m_origin.x, gamedata::stages::levelOfGround - m_anim->m_origin.y, m_anim->m_width, m_anim->m_height, m_camera, 0, SDL_FLIP_NONE);

@@ -13,9 +13,9 @@ class EngineAnimation
 public:
     EngineAnimation();
 
-    void saveAnimation(const std::string &path_, int blurRange_, Renderer &ren_);
+    bool saveAnimation(const std::string &path_, int blurRange_, Renderer &ren_, int version_);
 
-    void loadAnimation(const std::string &path_, Renderer &ren_);
+    bool loadAnimation(const std::string &path_, Renderer &ren_);
 
     void addFrame(const std::string &path_, Renderer &ren_);
 
@@ -44,7 +44,7 @@ public:
         void clear();
     };
 
-    std::array<Layer, 2> m_layers;
+    std::array<Layer, 3> m_layers;
 
     int m_width = 1;
     int m_height = 1;
@@ -53,7 +53,7 @@ public:
     int m_frameCount = 0;
     SDL_RWops *m_rw = nullptr;
 
-    TimelineProperty<int> m_framesData;
+    TimelinePropertyEditable<int> m_framesData;
     int m_duration = 1;
     Vector2<float> m_origin;
 
@@ -64,10 +64,13 @@ public:
 
     // Create pure white version of surface
     SDL_Surface *toPureWhite(SDL_Surface *sur_, int blurRange_);
+    SDL_Surface *toEdge(SDL_Surface *sur_);
 
     void saveAnimationV1(int blurRange_, Renderer &ren_);
+    void saveAnimationV2(int blurRange_, Renderer &ren_);
 
     void loadAnimationV1(Renderer &ren_);
+    void loadAnimationV2(Renderer &ren_);
 };
 
 #endif

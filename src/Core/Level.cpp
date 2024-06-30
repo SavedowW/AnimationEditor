@@ -74,8 +74,5 @@ void Level::receiveInput(EVENTS event, const float scale_)
 			if (scale_ > 0)
 				m_globalPause = !m_globalPause;
 			break;
-
-		default:
-			std::cout << "Level received unsupported event " << (int)event << std::endl;
 	}
 }

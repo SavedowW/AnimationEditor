@@ -108,38 +108,62 @@ const T &TimelineProperty<T>::operator[](uint32_t timeMark_) const
 }
 
 template <typename T>
-int TimelineProperty<T>::getValuesCount() const
+TimelinePropertyEditable<T>::TimelinePropertyEditable(std::vector<std::pair<uint32_t, T>> &&values_) :
+    TimelineProperty<T>(std::move(values_))
 {
-    return m_values.size();
 }
 
 template <typename T>
-std::pair<uint32_t, T> &TimelineProperty<T>::getValuePair(int id_)
+TimelinePropertyEditable<T>::TimelinePropertyEditable(T &&value_) :
+    TimelineProperty<T>(std::move(value_))
 {
-    return m_values[id_];
 }
 
 template <typename T>
-void TimelineProperty<T>::setPairValue(int id_, T &&value_)
+TimelinePropertyEditable<T>::TimelinePropertyEditable(const T &value_) :
+    TimelineProperty<T>(value_)
 {
-    m_values[id_].second = std::move(value_);
 }
 
 template <typename T>
-bool TimelineProperty<T>::deletePair(int id_)
+TimelinePropertyEditable<T>::TimelinePropertyEditable() :
+    TimelineProperty<T>()
 {
-    if (m_values[id_].first == 0)
+}
+
+template <typename T>
+int TimelinePropertyEditable<T>::getValuesCount() const
+{
+    return TimelineProperty<T>::m_values.size();
+}
+
+template <typename T>
+std::pair<uint32_t, T> &TimelinePropertyEditable<T>::getValuePair(int id_)
+{
+    return TimelineProperty<T>::m_values[id_];
+}
+
+template <typename T>
+void TimelinePropertyEditable<T>::setPairValue(int id_, T &&value_)
+{
+    TimelineProperty<T>::m_values[id_].second = std::move(value_);
+}
+
+template <typename T>
+bool TimelinePropertyEditable<T>::deletePair(int id_)
+{
+    if (TimelineProperty<T>::m_values[id_].first == 0)
         return false;
 
-    m_values.erase(m_values.begin() + id_);
+    TimelineProperty<T>::m_values.erase(TimelineProperty<T>::m_values.begin() + id_);
     return true;
 }
 
 template <typename T>
-void TimelineProperty<T>::clear()
+void TimelinePropertyEditable<T>::clear()
 {
-    m_values.clear();
-    m_isEmpty = true;
+    TimelineProperty<T>::m_values.clear();
+    TimelineProperty<T>::m_isEmpty = true;
 }
 
 template<typename T>
@@ -153,3 +177,9 @@ template class TimelineProperty<float>;
 template class TimelineProperty<int>;
 template class TimelineProperty<Vector2<float>>;
 template class TimelineProperty<Vector2<int>>;
+
+template class TimelinePropertyEditable<bool>;
+template class TimelinePropertyEditable<float>;
+template class TimelinePropertyEditable<int>;
+template class TimelinePropertyEditable<Vector2<float>>;
+template class TimelinePropertyEditable<Vector2<int>>;

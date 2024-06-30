@@ -12,7 +12,7 @@ class ImTimelinePropertyInt
 public:
     ImTimelinePropertyInt();
 
-    void setProps(TimelineProperty<int> *prop_);
+    void setProps(TimelinePropertyEditable<int> *prop_);
     void setLimits(const int &min_, const int &max_);
     void clampAll();
     void clampID(int id_);
@@ -22,7 +22,7 @@ public:
     void rebuildList();
 
 protected:
-    TimelineProperty<int> *m_prop;
+    TimelinePropertyEditable<int> *m_prop;
     std::vector<std::pair<uint32_t, int>> m_pairs;
 
     bool m_limited = false;

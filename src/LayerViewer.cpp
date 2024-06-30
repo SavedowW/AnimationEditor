@@ -25,15 +25,19 @@ void LayerViewer::setAnim(EngineAnimation *anim_)
 void LayerViewer::proceed()
 {
     static int blurRange_ = 2;
+
     ImGui::InputInt("Pure white blur range", &blurRange_);
+
+    for (int i = 0; i < m_layers.size(); ++i)
+        ImGui::ColorEdit3((m_anim->m_layers[m_layers[i].m_layerId].m_layerName + " color mod").c_str(), m_layerColorMods[i]);
 
     // Name*, [Generate], [Up], [Down], [Alpha]
     if (ImGui::BeginTable("Layer data", 5,  ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchSame))
     {
         //ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 16);
         ImGui::TableSetupColumn("", 0, 100);
-        ImGui::TableSetupColumn("", 0, 50);
-        ImGui::TableSetupColumn("", 0, 50);
+        ImGui::TableSetupColumn("", 0, 75);
+        ImGui::TableSetupColumn("", 0, 25);
         ImGui::TableSetupColumn("", 0, 50);
         ImGui::TableSetupColumn("", 0, 100);
 
@@ -91,7 +95,11 @@ void LayerViewer::draw(Renderer &renderer_, Camera &cam_, int currentFrame_, flo
         if (layerData.m_alpha && m_anim->m_layers[layerData.m_layerId].m_isGenerated)
         {
             auto *tex = (*m_anim)(layerData.m_layerId, currentFrame_);
+
             SDL_SetTextureAlphaMod(tex, layerData.m_alpha);
+
+            SDL_SetTextureColorMod(tex, 255 * m_layerColorMods[layerData.m_layerId][0], 255 * m_layerColorMods[layerData.m_layerId][1], 255 * m_layerColorMods[layerData.m_layerId][2]);
+
             renderer_.renderTexture(tex, m_lvlSize.x / 2.0f - m_anim->m_origin.x, levelOfGround_ - m_anim->m_origin.y, m_anim->m_width, m_anim->m_height, cam_, 0, SDL_FLIP_NONE);
         }
     }

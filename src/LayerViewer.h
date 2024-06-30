@@ -30,6 +30,11 @@ private:
     EngineAnimation *m_anim;
     Renderer *m_ren;
 
+    std::array<float[3], 3> m_layerColorMods = {
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f
+        };
 };
 
 #endif

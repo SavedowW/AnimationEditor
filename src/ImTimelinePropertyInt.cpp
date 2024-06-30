@@ -4,7 +4,7 @@ ImTimelinePropertyInt::ImTimelinePropertyInt()
 {
 }
 
-void ImTimelinePropertyInt::setProps(TimelineProperty<int> *prop_)
+void ImTimelinePropertyInt::setProps(TimelinePropertyEditable<int> *prop_)
 {
     m_prop = prop_;
 

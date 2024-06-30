@@ -27,16 +27,25 @@ public:
 
     const T &operator[](uint32_t timeMark_) const;
 
+protected:
+    std::vector<std::pair<uint32_t, T>> m_values;
+    bool m_isEmpty;
+};
+
+template<typename T>
+class TimelinePropertyEditable: public TimelineProperty<T>
+{
+public:
+    TimelinePropertyEditable(std::vector<std::pair<uint32_t, T>> &&values_);
+    TimelinePropertyEditable(T &&value_);
+    TimelinePropertyEditable(const T &value_);
+    TimelinePropertyEditable();
+
     int getValuesCount() const;
     std::pair<uint32_t, T> &getValuePair(int id_);
     void setPairValue(int id_, T &&value_);
     bool deletePair(int id_);
     void clear();
-
-private:
-    std::vector<std::pair<uint32_t, T>> m_values;
-    bool m_isEmpty;
-
 };
 
 #endif

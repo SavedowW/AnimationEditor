@@ -12,7 +12,7 @@ namespace gamedata
         inline constexpr int numberOfStages = 1;
         inline constexpr float stageWidth = 2500.0f;
         inline constexpr float stageHeight = 2500.0f;
-        inline constexpr float levelOfGround = 2400.0f;
+        inline constexpr float levelOfGround = 2460.0f;
         inline constexpr int framesBeforeZoom = 60;
         inline constexpr float maxCharRange = 1500.0f;
         inline constexpr Vector2<float> startingCameraPos = {stageWidth / 2.0f, stageHeight - 450};
@@ -23,8 +23,8 @@ namespace gamedata
             Vector2{stageWidth / 2.0f - charSpawnRange, levelOfGround},
             Vector2{stageWidth / 2.0f + charSpawnRange, levelOfGround}
         }};
-        inline constexpr float minCameraScale = 0.18f;
-        inline constexpr float maxCameraScale = 1.0f;
+        inline constexpr float minCameraScale = 0.1f;
+        inline constexpr float maxCameraScale = 1.5f;
         inline constexpr float heightMovePriority = 0.6f;
         inline constexpr float reservedScaleRange = 200.0f;
         inline constexpr float verticalCameraOffset = 270.0f;
