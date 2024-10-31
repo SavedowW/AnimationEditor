@@ -424,11 +424,12 @@ void AnimViewLevel::update()
         
         ImGui::Begin("Sprite order", &m_winOpen);
 
-        if (ImGui::BeginTable("Sprite order tbl", 4,  ImGuiTableFlags_SizingStretchSame))
+        if (ImGui::BeginTable("Sprite order tbl", 5,  ImGuiTableFlags_SizingStretchSame))
         {
             ImGui::TableSetupColumn("Filename", ImGuiTableColumnFlags_WidthFixed);
             ImGui::TableSetupColumn("MoveUp");
             ImGui::TableSetupColumn("MoveDown");
+            ImGui::TableSetupColumn("MoveToBottom");
             ImGui::TableSetupColumn("filler", 0);
             for (int i = 0; i < m_sprites.size(); ++i)
             {
@@ -449,6 +450,13 @@ void AnimViewLevel::update()
                 {
                     if (i != m_sprites.size() - 1)
                         std::swap(m_sprites[i], m_sprites[i + 1]);
+                }
+
+                ImGui::TableSetColumnIndex(3);
+                if (ImGui::Button((std::string("Move to bottom##") + std::to_string(i)).c_str()))
+                {
+                    for (int k = i; k < m_sprites.size() - 1; ++k)
+                        std::swap(m_sprites[k], m_sprites[k + 1]);
                 }
             }
             ImGui::EndTable();

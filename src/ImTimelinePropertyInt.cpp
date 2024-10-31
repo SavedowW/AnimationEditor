@@ -85,6 +85,18 @@ void ImTimelinePropertyInt::proceed(int currentFrame_)
     {
         nval = utils::clamp(nval, m_min, m_max);
     }
+
+    static int generatedFrameDuration = 0;
+    ImGui::InputInt("##FramesPerFrame", &generatedFrameDuration);
+    if (ImGui::Button("Generate with consistent frame duration##FramesPerFrame"))
+    {
+        m_prop->clear();
+        for (int i = m_min; i <= m_max; ++i)
+        {
+            m_prop->addPropertyValue(i * generatedFrameDuration, std::move(i));
+        }
+        rebuildList();
+    }
 }
 
 void ImTimelinePropertyInt::rebuildList()
