@@ -1,4 +1,5 @@
 #include "EngineAnimation.h"
+#include <set>
 
 bool isPixelInSurface(int x_, int y_, SDL_Surface *sur_)
 {
@@ -32,7 +33,7 @@ EngineAnimation::EngineAnimation()
     m_layers[0].m_isGenerated = true;
 
     m_layers[1].m_layerName = "Pure White";
-    m_layers[2].m_layerName = "Light Edge";
+    m_layers[2].m_layerName = "Outline";
 }
 
 bool EngineAnimation::saveAnimation(const std::string &path_, int blurRange_, Renderer &ren_, int version_)
@@ -151,45 +152,35 @@ SDL_Texture *EngineAnimation::operator()(size_t layer_, uint32_t frame_)
 
 void EngineAnimation::generateLayer(size_t layer_, int blurRange_, Renderer &ren_)
 {
-    if (layer_ == 1)
-    {
-        std::cout << "Generating " + m_layers[layer_].m_layerName << " layer\n";
-        for (int i = 0; i < m_frameCount; ++i)
-        {
-            std::cout << "Sprite " << i + 1 << " / " << m_frameCount << std::endl;
-
-            if (m_layers[layer_].m_textures[i])
-                SDL_DestroyTexture(m_layers[layer_].m_textures[i]);
-            if (m_layers[layer_].m_surfaces[i])
-                SDL_FreeSurface(m_layers[layer_].m_surfaces[i]);
-            
-            m_layers[layer_].m_surfaces[i] = toPureWhite(m_layers[0].m_surfaces[i], blurRange_);
-            m_layers[layer_].m_textures[i] = ren_.createTextureFromSurface(m_layers[layer_].m_surfaces[i]);
-        }
-
-        m_layers[layer_].m_isGenerated = true;
-    }
-    else if (layer_ == 2)
-    {
-        std::cout << "Generating " + m_layers[layer_].m_layerName << " layer\n";
-        for (int i = 0; i < m_frameCount; ++i)
-        {
-            std::cout << "Sprite " << i + 1 << " / " << m_frameCount << std::endl;
-
-            if (m_layers[layer_].m_textures[i])
-                SDL_DestroyTexture(m_layers[layer_].m_textures[i]);
-            if (m_layers[layer_].m_surfaces[i])
-                SDL_FreeSurface(m_layers[layer_].m_surfaces[i]);
-            
-            m_layers[layer_].m_surfaces[i] = toEdge(m_layers[0].m_surfaces[i]);
-            m_layers[layer_].m_textures[i] = ren_.createTextureFromSurface(m_layers[layer_].m_surfaces[i]);
-        }
-
-        m_layers[layer_].m_isGenerated = true;
-    }
-    else
-    {
+    std::set<size_t> availableLayers{1, 2};
+    if (!availableLayers.contains(layer_))
         throw std::string("No passed layer");
+
+    std::cout << "Generating " + m_layers[layer_].m_layerName << " layer\n";
+    for (int i = 0; i < m_frameCount; ++i)
+    {
+        std::cout << "Sprite " << i + 1 << " / " << m_frameCount << std::endl;
+
+        if (m_layers[layer_].m_textures[i])
+            SDL_DestroyTexture(m_layers[layer_].m_textures[i]);
+        if (m_layers[layer_].m_surfaces[i])
+            SDL_FreeSurface(m_layers[layer_].m_surfaces[i]);
+
+        switch (layer_)
+        {
+            case 1:
+                m_layers[layer_].m_surfaces[i] = toPureWhite(m_layers[0].m_surfaces[i], blurRange_);
+                break;
+
+            case 2:
+                m_layers[layer_].m_surfaces[i] = toOutline(m_layers[0].m_surfaces[i]);
+                break;
+
+            default:
+                throw std::string("No passed layer");
+        }
+
+        m_layers[layer_].m_textures[i] = ren_.createTextureFromSurface(m_layers[layer_].m_surfaces[i]);
     }
 }
 
@@ -330,6 +321,30 @@ SDL_Surface *EngineAnimation::toEdge(SDL_Surface *sur_)
                 avg += (255 - getPixelAlpha(x + 1, y - 1, sur_)) / 3.0f;
 
                 pixel2[3] = avg;
+            }
+        }
+    }
+
+    return nsur;
+}
+
+SDL_Surface *EngineAnimation::toOutline(SDL_Surface *sur_)
+{
+    SDL_Surface *nsur = SDL_CreateRGBSurface(0, sur_->w, sur_->h, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    SDL_FillRect(nsur, nullptr, SDL_MapRGBA(nsur->format, 255, 255, 255, 0));
+
+    for (int y = 0; y < nsur->h; ++y)
+    {
+        for (int x = 0; x < nsur->w; ++x)
+        {
+            uint8_t *pixel1 = getPixel(x, y, sur_);
+            uint8_t *pixel2 = getPixel(x, y, nsur);
+            
+            if (pixel1[3] == 0)
+            {
+                if (getPixelAlpha(x - 1, y, sur_) || getPixelAlpha(x + 1, y, sur_)
+                 || getPixelAlpha(x, y - 1, sur_) || getPixelAlpha(x, y + 1, sur_))
+                    pixel2[3] = 255;
             }
         }
     }

@@ -62,9 +62,10 @@ public:
 
     char *m_compressionBuffer = nullptr;
 
-    // Create pure white version of surface
+    // Generate layers
     SDL_Surface *toPureWhite(SDL_Surface *sur_, int blurRange_);
     SDL_Surface *toEdge(SDL_Surface *sur_);
+    SDL_Surface *toOutline(SDL_Surface *sur_);
 
     void saveAnimationV1(int blurRange_, Renderer &ren_);
     void saveAnimationV2(int blurRange_, Renderer &ren_);
